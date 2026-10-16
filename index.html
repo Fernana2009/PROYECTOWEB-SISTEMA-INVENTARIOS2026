@@ -6,7 +6,7 @@
     <title>Creaciones Bolivianita Joyería - Sistema de Inventarios</title>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS para Excel -->
+    <!-- SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -45,7 +45,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 1.5rem;
-            height: 60px;
+            height: 70px;
             border-bottom: 2px solid var(--gold);
             flex-shrink: 0;
         }
@@ -53,18 +53,20 @@
         .brand-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .brand-logo-svg {
-            width: 38px;
-            height: 38px;
+            width: 46px;
+            height: 46px;
         }
 
+        /* TÍTULO PRINCIPAL MÁS GRANDE */
         .brand-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.35rem;
+            font-weight: 700;
             color: var(--white);
+            letter-spacing: 0.5px;
         }
 
         .brand-title span {
@@ -81,8 +83,8 @@
             border: none;
             color: #A1A1AA;
             padding: 0 1.5rem;
-            font-size: 0.95rem;
-            font-weight: 500;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -100,7 +102,6 @@
             color: var(--gold);
             border-bottom-color: var(--gold);
             background-color: rgba(212, 175, 55, 0.08);
-            font-weight: 600;
         }
 
         main {
@@ -195,7 +196,7 @@
             width: 100%;
         }
 
-        /* PESTAÑA 2 */
+        /* PESTAÑA 2: INVENTARIOS CON BARRAS EN LA PARTE INFERIOR */
         #tab-inventarios {
             display: flex;
             flex-direction: column;
@@ -203,10 +204,19 @@
             background-color: #F4F4F6;
         }
 
-        .toolbar-area {
+        .toolbar-top {
             background-color: var(--white);
-            padding: 1rem 1.5rem;
+            padding: 0.8rem 1.5rem;
             border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .toolbar-bottom {
+            background-color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -263,7 +273,7 @@
             border-bottom: 1px solid #EAEAEA;
         }
 
-        /* PESTAÑA 3 */
+        /* PESTAÑA 3: RECTÁNGULO UNIFICADO */
         #tab-graficos {
             padding: 1.5rem;
             overflow-y: auto;
@@ -271,38 +281,40 @@
             background-color: #F8F9FA;
         }
 
-        .paste-area-box {
+        .unified-control-card {
             background-color: var(--white);
-            padding: 1.25rem;
+            padding: 1.25rem 1.5rem;
             border-radius: 10px;
             border: 1px solid var(--border-color);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .unified-header h3 {
+            color: var(--bg-dark);
+            font-size: 1.1rem;
+            font-weight: 700;
         }
 
         .paste-area-box textarea {
             width: 100%;
-            height: 90px;
+            height: 85px;
             border: 1px dashed var(--gold);
             border-radius: 6px;
             padding: 0.75rem;
             font-family: monospace;
             font-size: 0.85rem;
             outline: none;
-            margin-top: 0.5rem;
             background-color: #FAFAFA;
         }
 
-        .dashboard-toolbar-bottom {
-            background-color: var(--white);
-            padding: 1rem 1.25rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
+        .card-bottom-actions {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+            justify-content: flex-end;
+            gap: 10px;
         }
 
         .kpi-grid {
@@ -351,7 +363,6 @@
             min-height: 320px;
         }
 
-        /* MODAL */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -376,13 +387,11 @@
 
     <header>
         <div class="brand-container">
-            <!-- Logo Vectorizado Anillo CB -->
+            <!-- LOGO OFICIAL VECTORIZADO FIEL A LA IMAGEN -->
             <svg class="brand-logo-svg" viewBox="0 0 200 200" fill="none">
-                <circle cx="100" cy="115" r="65" stroke="#C0C0C0" stroke-width="12"/>
-                <circle cx="100" cy="115" r="58" stroke="#FFFFFF" stroke-width="3"/>
-                <polygon points="100,20 135,55 100,95 65,55" fill="#C0A3E5" stroke="#D4AF37" stroke-width="4"/>
+                <circle cx="100" cy="115" r="62" stroke="#C0C0C0" stroke-width="10"/>
+                <polygon points="100,20 135,55 100,95 65,55" fill="#C0A3E5" stroke="#D4AF37" stroke-width="3"/>
                 <line x1="65" y1="55" x2="135" y2="55" stroke="#FFFFFF" stroke-width="2"/>
-                <line x1="100" y1="20" x2="100" y2="95" stroke="#D4AF37" stroke-width="2"/>
                 <path d="M 82 125 C 70 100, 115 95, 105 115 C 95 135, 125 130, 120 115" stroke="#D4AF37" stroke-width="5" fill="none" stroke-linecap="round"/>
             </svg>
             <div class="brand-title">Creaciones <span>Bolivianita</span> Joyería</div>
@@ -406,11 +415,11 @@
                     </div>
                     
                     <div style="text-align:center; margin: 2rem 0;">
-                        <svg style="width:160px; height:160px;" viewBox="0 0 200 200" fill="none">
-                            <circle cx="100" cy="115" r="65" stroke="#C0C0C0" stroke-width="12"/>
-                            <polygon points="100,20 135,55 100,95 65,55" fill="#C0A3E5" stroke="#D4AF37" stroke-width="4"/>
+                        <svg style="width:170px; height:170px;" viewBox="0 0 200 200" fill="none">
+                            <circle cx="100" cy="115" r="62" stroke="#C0C0C0" stroke-width="10"/>
+                            <polygon points="100,20 135,55 100,95 65,55" fill="#C0A3E5" stroke="#D4AF37" stroke-width="3"/>
                             <line x1="65" y1="55" x2="135" y2="55" stroke="#FFFFFF" stroke-width="2"/>
-                            <path d="M 82 125 C 70 100, 115 95, 105 115 C 95 135, 125 130, 120 115" stroke="#D4AF37" stroke-width="6" fill="none"/>
+                            <path d="M 82 125 C 70 100, 115 95, 105 115 C 95 135, 125 130, 120 115" stroke="#D4AF37" stroke-width="5" fill="none"/>
                         </svg>
                     </div>
 
@@ -438,20 +447,8 @@
 
         <!-- PESTAÑA 2 -->
         <section id="tab-inventarios" class="tab-content">
-            <div class="toolbar-area">
-                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                    <button class="btn-action btn-gold" onclick="openModal()">+ Un solo Anote</button>
-
-                    <button class="btn-action btn-purple" onclick="document.getElementById('excel-file-input').click()">Importar Excel / Catálogo</button>
-                    <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display:none;" onchange="importExcelFile(event)">
-
-                    <button class="btn-action btn-purple" onclick="copySelectedRows()">Copiar Selección al Portapapeles</button>
-                    <button class="btn-action" onclick="exportToExcel()">Exportar a Excel</button>
-                </div>
-
-                <div>
-                    <input type="text" id="search-input" placeholder="Buscar por código, joya..." class="form-control" style="width:250px; padding:0.4rem 0.8rem;" onkeyup="filterTable()">
-                </div>
+            <div class="toolbar-top">
+                <input type="text" id="search-input" placeholder="Buscar por código, joya..." class="form-control" style="width:250px; padding:0.4rem 0.8rem;" onkeyup="filterTable()">
             </div>
 
             <div class="grid-container">
@@ -476,31 +473,36 @@
                     </table>
                 </div>
             </div>
+
+            <!-- BOTONES TRASLADADOS A LA PARTE INFERIOR -->
+            <div class="toolbar-bottom">
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn-action btn-gold" onclick="openModal()">+ Un solo Anote</button>
+                    <button class="btn-action btn-purple" onclick="document.getElementById('excel-file-input').click()">Importar Excel / Catálogo</button>
+                    <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display:none;" onchange="importExcelFile(event)">
+                    <button class="btn-action btn-purple" onclick="copySelectedRows()">Copiar Selección al Portapapeles</button>
+                    <button class="btn-action" onclick="exportToExcel()">Exportar a Excel</button>
+                </div>
+            </div>
         </section>
 
-        <!-- PESTAÑA 3 -->
+        <!-- PESTAÑA 3: RECTÁNGULO UNIFICADO -->
         <section id="tab-graficos" class="tab-content">
-            <!-- 1. Área de Pegado Rápido -->
-            <div class="paste-area-box">
-                <label style="font-weight: 600; font-size:0.85rem; color: var(--bg-dark);">
-                    Área de Pegado Rápido (Copia columnas desde Excel o el Sistema y pégalas aquí):
-                </label>
-                <textarea id="paste-input" placeholder="Pega aquí los datos copiados (ej: SKU, Joya, Stock, Precio...)"></textarea>
-            </div>
-
-            <!-- 2. Rectángulo Tablero Control e Indicadores (Alineado Abajo a la Derecha) -->
-            <div class="dashboard-toolbar-bottom">
-                <div>
-                    <h3 style="color:var(--bg-dark);">Tablero Control e Indicadores</h3>
-                    <p style="font-size:0.85rem; color:var(--text-muted);">Sincroniza y visualiza datos del inventario en esquemas gráficos.</p>
+            <div class="unified-control-card">
+                <div class="unified-header">
+                    <h3>Sincroniza y visualiza datos del inventario en esquemas gráficos.</h3>
                 </div>
-                <div style="display:flex; gap:10px; justify-content:flex-end;">
+
+                <div class="paste-area-box">
+                    <textarea id="paste-input" placeholder="Pega aquí los datos copiados (ej: SKU, Joya, Stock, Precio...)"></textarea>
+                </div>
+
+                <div class="card-bottom-actions">
                     <button class="btn-action btn-purple" onclick="loadFromCurrentInventory()">Cargar Desde Selección Actual</button>
                     <button class="btn-action btn-gold" onclick="pasteAndGenerateChart()">Pegar e Importar Datos para Gráfica</button>
                 </div>
             </div>
 
-            <!-- 3. Indicadores KPI -->
             <div class="kpi-grid">
                 <div class="kpi-card">
                     <div class="kpi-title">Total Inventario Valorizado</div>
@@ -519,7 +521,6 @@
                 </div>
             </div>
 
-            <!-- 4. Gráficos de Control -->
             <div class="charts-main-grid">
                 <div class="chart-box">
                     <h4 style="margin-bottom:1rem;">Nivel de Stock por Joya / Producto</h4>
@@ -538,7 +539,7 @@
         </section>
     </main>
 
-    <!-- Modal "Un Solo Anote" -->
+    <!-- Modal -->
     <div class="modal-overlay" id="modal-anote">
         <div class="modal-card">
             <h3 style="margin-bottom:1rem; color:var(--bg-dark);">Vincular Codificación e Inventario</h3>
