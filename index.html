@@ -6,11 +6,12 @@
     <title>Creaciones Bolivianita Joyería - Sistema de Inventarios</title>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS para Excel -->
+    <!-- SheetJS for Excel export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --bg-dark: #1F1F24;
+            --bg-darker: #151518;
             --gold: #D4AF37;
             --gold-hover: #B59328;
             --purple-light: #C0A3E5;
@@ -64,6 +65,7 @@
         .brand-title {
             font-size: 1.1rem;
             font-weight: 600;
+            letter-spacing: 0.5px;
             color: var(--white);
         }
 
@@ -119,7 +121,11 @@
             display: block;
         }
 
-        /* PESTAÑA 1: INICIO */
+        #tab-inicio {
+            height: 100%;
+            width: 100%;
+        }
+
         .split-login-container {
             display: flex;
             height: 100%;
@@ -134,11 +140,21 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: relative;
+            background-image: radial-gradient(circle at 10% 20%, rgba(192, 163, 229, 0.08) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 40%);
+        }
+
+        .brand-hero {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .hero-title {
             font-size: 2.2rem;
             font-weight: 300;
+            line-height: 1.2;
             margin-top: 1.5rem;
             color: var(--white);
         }
@@ -147,6 +163,39 @@
             font-weight: 700;
             color: var(--gold);
             display: block;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: #A1A1AA;
+            margin-top: 1rem;
+            max-width: 450px;
+            line-height: 1.5;
+        }
+
+        .hero-image-box {
+            width: 100%;
+            max-height: 240px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .hero-image-box svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-footer-text {
+            font-size: 0.85rem;
+            color: #71717A;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
         }
 
         .login-right-panel {
@@ -163,6 +212,23 @@
             max-width: 420px;
         }
 
+        .login-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .login-header h2 {
+            font-size: 1.8rem;
+            color: var(--bg-dark);
+            font-weight: 700;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.3rem;
+        }
+
         .form-group {
             margin-bottom: 1.25rem;
         }
@@ -171,10 +237,11 @@
             display: block;
             font-size: 0.85rem;
             font-weight: 600;
+            color: var(--text-dark);
             margin-bottom: 0.5rem;
         }
 
-        .form-control {
+        .input-with-icon input {
             width: 100%;
             padding: 0.75rem 1rem;
             border: 1px solid var(--border-color);
@@ -183,7 +250,13 @@
             outline: none;
         }
 
+        .input-with-icon input:focus {
+            border-color: var(--purple-light);
+            box-shadow: 0 0 0 3px rgba(192, 163, 229, 0.25);
+        }
+
         .btn-gold {
+            width: 100%;
             background-color: var(--gold);
             color: var(--bg-dark);
             font-weight: 700;
@@ -192,14 +265,27 @@
             border-radius: 8px;
             font-size: 1rem;
             cursor: pointer;
-            width: 100%;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-gold:hover {
             background-color: var(--gold-hover);
         }
 
-        /* PESTAÑA 2: INVENTARIO */
+        .login-info-alert {
+            background-color: var(--purple-soft);
+            border: 1px solid var(--purple-light);
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            font-size: 0.85rem;
+            color: var(--purple-dark);
+            margin-top: 1.5rem;
+        }
+
         #tab-inventarios {
             display: flex;
             flex-direction: column;
@@ -215,26 +301,57 @@
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-left, .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 280px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
         }
 
         .btn-action {
             background-color: var(--white);
             border: 1px solid var(--border-color);
             color: var(--text-dark);
-            padding: 0.6rem 1rem;
+            padding: 0.5rem 0.9rem;
             border-radius: 6px;
             font-size: 0.88rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: #F8F9FA;
         }
 
         .btn-purple {
             background-color: var(--purple-light);
             color: var(--bg-dark);
             border: none;
+            font-weight: 600;
+        }
+
+        .btn-purple:hover {
+            background-color: #B08FE0;
         }
 
         .grid-container {
@@ -247,6 +364,7 @@
             background-color: var(--white);
             border-radius: 8px;
             border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             overflow: hidden;
         }
 
@@ -261,15 +379,92 @@
             background-color: #2A2A32;
             color: var(--white);
             padding: 0.75rem 1rem;
+            font-weight: 600;
             border-bottom: 2px solid var(--gold);
+            white-space: nowrap;
         }
 
         table.excel-table td {
             padding: 0.65rem 1rem;
             border-bottom: 1px solid #EAEAEA;
+            color: #333;
         }
 
-        /* PESTAÑA 3: GRAFICOS */
+        table.excel-table tbody tr:hover {
+            background-color: rgba(192, 163, 229, 0.1);
+        }
+
+        .badge-code {
+            background-color: var(--purple-soft);
+            color: var(--purple-dark);
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .badge-stock {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-stock.ok {
+            background-color: #E6F4EA;
+            color: #137333;
+        }
+
+        .badge-stock.low {
+            background-color: #FEF7E0;
+            color: #B06000;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 520px;
+            padding: 1.8rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-top: 4px solid var(--gold);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
         #tab-graficos {
             padding: 1.5rem;
             overflow-y: auto;
@@ -279,34 +474,15 @@
 
         .dashboard-toolbar {
             background-color: var(--white);
-            padding: 1.25rem 1.5rem;
+            padding: 1rem 1.5rem;
             border-radius: 10px;
             border: 1px solid var(--border-color);
             margin-bottom: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .paste-area-box {
-            background-color: var(--white);
-            padding: 1.25rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
-        }
-
-        .paste-area-box textarea {
-            width: 100%;
-            height: 90px;
-            border: 1px dashed var(--gold);
-            border-radius: 6px;
-            padding: 0.75rem;
-            font-family: monospace;
-            font-size: 0.85rem;
-            outline: none;
-            margin-top: 0.5rem;
-            background-color: #FAFAFA;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .kpi-grid {
@@ -321,27 +497,47 @@
             padding: 1.25rem;
             border-radius: 10px;
             border: 1px solid var(--border-color);
-            border-left: 4px solid var(--gold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--gold);
+        }
+
+        .kpi-card.purple::before {
+            background-color: var(--purple-light);
+        }
+
+        .kpi-card.dark::before {
+            background-color: var(--bg-dark);
         }
 
         .kpi-title {
             font-size: 0.8rem;
             font-weight: 700;
-            color: var(--text-muted);
             text-transform: uppercase;
+            color: var(--text-muted);
         }
 
         .kpi-value {
             font-size: 1.7rem;
             font-weight: 700;
             color: var(--bg-dark);
-            margin-top: 0.4rem;
+            margin: 0.4rem 0;
         }
 
         .charts-main-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .chart-box {
@@ -349,33 +545,40 @@
             padding: 1.25rem;
             border-radius: 10px;
             border: 1px solid var(--border-color);
-            min-height: 320px;
         }
 
-        /* MODAL */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-card {
+        .paste-area-box {
             background-color: var(--white);
-            border-radius: 12px;
+            padding: 1.25rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .paste-area-box textarea {
             width: 100%;
-            max-width: 500px;
-            padding: 1.8rem;
-            border-top: 4px solid var(--gold);
+            height: 80px;
+            border: 1px dashed var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            outline: none;
+            resize: none;
+            margin-top: 0.5rem;
+            background-color: #FAFAFA;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--gold);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <!-- Header / Menú Superior -->
     <header>
         <div class="brand-container">
             <svg class="brand-logo-svg" viewBox="0 0 100 100" fill="none">
@@ -394,47 +597,88 @@
     </header>
 
     <main>
-        <!-- PESTAÑA 1: INICIO -->
+        <!-- PESTAÑA 1 -->
         <section id="tab-inicio" class="tab-content active">
             <div class="split-login-container">
                 <div class="login-left-panel">
                     <div>
-                        <span style="color:var(--purple-light); font-weight:600;">CREACIONES BOLIVIANITA</span>
-                        <h1 class="hero-title">Cada pieza merece una <strong>gestión excepcional.</strong></h1>
+                        <div class="brand-hero">
+                            <span style="letter-spacing:1px; font-weight:600; color:var(--purple-light);">CREACIONES BOLIVIANITA</span>
+                        </div>
+                        <h1 class="hero-title">
+                            Cada pieza merece una
+                            <strong>gestión excepcional.</strong>
+                        </h1>
+                        <p class="hero-subtitle">
+                            Un espacio exclusivo para digitalizar, codificar y controlar el stock de tu joyería de alta precisión.
+                        </p>
                     </div>
-                    <div style="font-size:0.85rem; color:#71717A;">Gestión optimizada de productos y control de stock.</div>
+
+                    <div class="hero-image-box">
+                        <svg viewBox="0 0 400 220" fill="none">
+                            <circle cx="200" cy="130" r="60" stroke="#D4AF37" stroke-width="8"/>
+                            <path d="M200 40 L230 75 L200 115 L170 75 Z" fill="#C0A3E5" stroke="#FFFFFF" stroke-width="2"/>
+                            <path d="M200 40 L215 75 L200 115 L185 75 Z" fill="#D4AF37" opacity="0.8"/>
+                        </svg>
+                    </div>
+
+                    <div class="hero-footer-text">
+                        Gestión e innovación de productos optimizada - Módulo de Un Solo Anote
+                    </div>
                 </div>
 
                 <div class="login-right-panel">
                     <div class="login-card">
-                        <h2 style="margin-bottom:0.5rem; color:var(--bg-dark);">Bienvenido a tu joyería</h2>
-                        <p style="margin-bottom:1.5rem; color:var(--text-muted); font-size:0.9rem;">Ingresa tus datos para acceder al sistema.</p>
-                        
-                        <div class="form-group">
-                            <label>Usuario</label>
-                            <input type="text" class="form-control" value="admin@bolivianita.com">
+                        <div class="login-header">
+                            <h2>Bienvenido a tu joyería</h2>
+                            <p>Ingresa tus credenciales para acceder al sistema de gestión.</p>
                         </div>
-                        <div class="form-group">
-                            <label>Contraseña</label>
-                            <input type="password" class="form-control" value="••••••••">
-                        </div>
-                        <button type="button" class="btn-gold" onclick="switchTab('inventarios')">Iniciar sesión</button>
+
+                        <form onsubmit="event.preventDefault(); switchTab('inventarios');">
+                            <div class="form-group">
+                                <label>Correo electrónico o usuario</label>
+                                <div class="input-with-icon">
+                                    <input type="text" placeholder="admin@bolivianita.com" value="admin@bolivianita.com" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Contraseña</label>
+                                <div class="input-with-icon">
+                                    <input type="password" value="1234" required>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn-gold" onclick="switchTab('inventarios')">Iniciar sesión</button>
+
+                            <div class="login-info-alert">
+                                Acceso restringido para personal autorizado.
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- PESTAÑA 2: INVENTARIOS -->
+        <!-- PESTAÑA 2 -->
         <section id="tab-inventarios" class="tab-content">
             <div class="toolbar-area">
-                <div style="display:flex; gap:10px;">
+                <div class="toolbar-left">
                     <button class="btn-action btn-gold" onclick="openModal()">+ Un solo Anote</button>
-                    <button class="btn-action btn-purple" onclick="copySelectedRows()">Copiar Selección al Portapapeles</button>
-                    <button class="btn-action" onclick="exportToExcel()">Exportar a Excel</button>
+                    <button class="btn-action btn-purple" onclick="copySelectedRows()">Copiar Datos Seleccionados</button>
+                    <button class="btn-action" onclick="exportToExcel()">Exportar Excel</button>
                 </div>
 
-                <div>
-                    <input type="text" id="search-input" placeholder="Buscar por código, joya..." class="form-control" style="width:250px; padding:0.4rem 0.8rem;" onkeyup="filterTable()">
+                <div class="toolbar-right">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Buscar por código, joya..." onkeyup="filterTable()">
+                    </div>
+                    <select class="btn-action" id="location-filter" onchange="filterTable()">
+                        <option value="">Todas las Ubicaciones</option>
+                        <option value="Bóveda Principal">Bóveda Principal</option>
+                        <option value="Vitrina Exhibición A">Vitrina Exhibición A</option>
+                        <option value="Taller de Joyería">Taller de Joyería</option>
+                    </select>
                 </div>
             </div>
 
@@ -453,6 +697,7 @@
                                 <th>Stock Mín.</th>
                                 <th>Precio Unit. ($)</th>
                                 <th>Valor Total ($)</th>
+                                <th>Estado</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -462,48 +707,55 @@
             </div>
         </section>
 
-        <!-- PESTAÑA 3: GRAFICOS Y ESQUEMAS -->
+        <!-- PESTAÑA 3 -->
         <section id="tab-graficos" class="tab-content">
             <div class="dashboard-toolbar">
                 <div>
-                    <h3 style="color:var(--bg-dark);">Panel de Control e Indicadores</h3>
-                    <p style="font-size:0.85rem; color:var(--text-muted);">Visualiza datos seleccionados del inventario o importa datos externos.</p>
+                    <h3 style="color:var(--bg-dark);">Tablero Control e Indicadores</h3>
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Sincroniza y visualiza datos del inventario en esquemas gráficos.</p>
                 </div>
                 <div style="display:flex; gap:10px;">
                     <button class="btn-action btn-purple" onclick="loadFromCurrentInventory()">Cargar Desde Selección Actual</button>
-                    <button class="btn-action btn-gold" onclick="pasteAndGenerateChart()">Generar Gráfica desde Texto Pegado</button>
+                    <button class="btn-action btn-gold" onclick="pasteAndGenerateChart()">Pegar e Importar Datos para Gráfica</button>
                 </div>
             </div>
 
             <div class="paste-area-box">
                 <label style="font-weight: 600; font-size:0.85rem; color: var(--bg-dark);">
-                    Área de Pegado Rápido (Pega aquí la información copiada desde Excel o la Pestaña de Inventarios):
+                    Área de Pegado Rápido (Copia columnas desde Excel o el Sistema y pégalas aquí):
                 </label>
-                <textarea id="paste-input" placeholder="Pega aquí filas copiadas (ej: SKU | Producto | Ubicación | Stock | Precio)..."></textarea>
+                <textarea id="paste-input" placeholder="Pega aquí los datos copiados (ej: SKU, Joya, Stock, Precio...)"></textarea>
             </div>
 
             <div class="kpi-grid">
                 <div class="kpi-card">
                     <div class="kpi-title">Total Inventario Valorizado</div>
                     <div class="kpi-value" id="kpi-total-val">$0.00</div>
+                    <div class="kpi-sub" id="kpi-total-items">0 Productos registrados</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card purple">
                     <div class="kpi-title">Total Unidades en Stock</div>
                     <div class="kpi-value" id="kpi-units">0 pzs</div>
+                    <div class="kpi-sub">Existencia total física</div>
+                </div>
+                <div class="kpi-card dark">
+                    <div class="kpi-title" style="color:#C0A3E5;">Ubicaciones Activas</div>
+                    <div class="kpi-value" style="color:#FFF;" id="kpi-locs">0</div>
+                    <div class="kpi-sub" style="color:#AAA;">Puntos de control</div>
                 </div>
             </div>
 
             <div class="charts-main-grid">
                 <div class="chart-box">
-                    <h4 style="margin-bottom:1rem; color:var(--bg-dark);">Nivel de Stock por Joya / Producto</h4>
-                    <div style="height:250px;">
+                    <h4 style="margin-bottom:1rem;">Nivel de Stock por Joya / Producto</h4>
+                    <div style="height:280px; position:relative;">
                         <canvas id="barChart"></canvas>
                     </div>
                 </div>
 
                 <div class="chart-box">
-                    <h4 style="margin-bottom:1rem; color:var(--bg-dark);">Distribución por Valor</h4>
-                    <div style="height:250px;">
+                    <h4 style="margin-bottom:1rem;">Distribución por Valor</h4>
+                    <div style="height:280px; position:relative;">
                         <canvas id="doughnutChart"></canvas>
                     </div>
                 </div>
@@ -511,40 +763,47 @@
         </section>
     </main>
 
-    <!-- Modal "Un Solo Anote" -->
+    <!-- Modal -->
     <div class="modal-overlay" id="modal-anote">
         <div class="modal-card">
-            <h3 style="margin-bottom:1rem; color:var(--bg-dark);">Vincular Codificación e Inventario</h3>
+            <div class="modal-header">
+                <h3>Vincular Codificación e Inventario</h3>
+                <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeModal()">✕</button>
+            </div>
             <form onsubmit="saveSingleNote(event)">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <div class="form-group">
-                        <label>Código SKU</label>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-group label">Código SKU</label>
                         <input type="text" id="m-sku" class="form-control" placeholder="JOY-001" required>
                     </div>
-                    <div class="form-group">
-                        <label>Nombre de Joya</label>
-                        <input type="text" id="m-name" class="form-control" placeholder="Anillo Oro 18K" required>
+                    <div>
+                        <label class="form-group label">Nombre de Joya</label>
+                        <input type="text" id="m-name" class="form-control" placeholder="Anillo Oro" required>
                     </div>
-                    <div class="form-group">
-                        <label>Ubicación</label>
-                        <input type="text" id="m-loc" class="form-control" value="Bóveda Principal">
+                    <div>
+                        <label class="form-group label">Ubicación</label>
+                        <select id="m-loc" class="form-control">
+                            <option value="Bóveda Principal">Bóveda Principal</option>
+                            <option value="Vitrina Exhibición A">Vitrina Exhibición A</option>
+                            <option value="Taller de Joyería">Taller de Joyería</option>
+                        </select>
                     </div>
-                    <div class="form-group">
-                        <label>Stock Inicial</label>
-                        <input type="number" id="m-stock" class="form-control" value="10" required>
+                    <div>
+                        <label class="form-group label">Stock Inicial</label>
+                        <input type="number" id="m-stock" class="form-control" value="10" min="0" required>
                     </div>
-                    <div class="form-group">
-                        <label>Stock Mínimo</label>
-                        <input type="number" id="m-min" class="form-control" value="2" required>
+                    <div>
+                        <label class="form-group label">Stock Mínimo</label>
+                        <input type="number" id="m-min" class="form-control" value="2" min="0" required>
                     </div>
-                    <div class="form-group">
-                        <label>Precio ($)</label>
+                    <div>
+                        <label class="form-group label">Precio ($)</label>
                         <input type="number" step="0.01" id="m-price" class="form-control" value="150.00" required>
                     </div>
                 </div>
-                <div style="margin-top:1rem; display:flex; justify-content:flex-end; gap:10px;">
+                <div style="margin-top:1.5rem; display:flex; justify-content:flex-end; gap:10px;">
                     <button type="button" class="btn-action" onclick="closeModal()">Cancelar</button>
-                    <button type="submit" class="btn-action btn-gold">Guardar</button>
+                    <button type="submit" class="btn-action btn-gold">Guardar Registro</button>
                 </div>
             </form>
         </div>
@@ -553,8 +812,8 @@
     <script>
         let inventoryData = [
             { id: 1, sku: 'JOY-BOL-01', name: 'Anillo Bolivianita Oro 18k', location: 'Bóveda Principal', stock: 8, min: 2, price: 450.00 },
-            { id: 2, sku: 'JOY-BOL-02', name: 'Dije Ametrino Tallado', location: 'Vitrina Exhibición A', stock: 15, min: 5, price: 280.00 },
-            { id: 3, sku: 'JOY-SIL-05', name: 'Pulsera Plata 925', location: 'Taller de Joyería', stock: 3, min: 4, price: 95.00 }
+            { id: 2, sku: 'JOY-BOL-02', name: 'Dije Ametrino Tallado Extra', location: 'Vitrina Exhibición A', stock: 15, min: 5, price: 280.00 },
+            { id: 3, sku: 'JOY-SIL-05', name: 'Pulsera Plata 925 Tejida', location: 'Taller de Joyería', stock: 3, min: 4, price: 95.00 }
         ];
 
         let barChartInstance = null;
@@ -562,25 +821,26 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderTable();
+            initCharts();
         });
 
-        // CAMBIO DE PESTAÑAS
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-            document.getElementById(`btn-tab-${tabId}`).classList.add('active');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const activeBtn = document.getElementById(`btn-tab-${tabId}`);
+            if(activeBtn) activeBtn.classList.add('active');
+            
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if(activeTab) activeTab.classList.add('active');
 
-            // Inicializar o renderizar gráficos al entrar a la Pestaña 3
             if(tabId === 'graficos') {
                 setTimeout(() => {
-                    initOrUpdateCharts(inventoryData);
-                }, 100);
+                    updateChartsFromData(inventoryData);
+                }, 50);
             }
         }
 
-        // MOSTRAR TABLA DE INVENTARIO
         function renderTable() {
             const tbody = document.getElementById('inventory-tbody');
             if(!tbody) return;
@@ -588,16 +848,18 @@
 
             inventoryData.forEach(item => {
                 const totalVal = (item.stock * item.price).toFixed(2);
+                const isLow = item.stock <= item.min;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="text-align:center;"><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
-                    <td><strong>${item.sku}</strong></td>
-                    <td>${item.name}</td>
+                    <td><span class="badge-code">${item.sku}</span></td>
+                    <td style="font-weight:600;">${item.name}</td>
                     <td>${item.location}</td>
-                    <td>${item.stock}</td>
+                    <td><strong>${item.stock}</strong></td>
                     <td>${item.min}</td>
                     <td>$${parseFloat(item.price).toFixed(2)}</td>
                     <td>$${totalVal}</td>
+                    <td><span class="badge-stock ${isLow ? 'low' : 'ok'}">${isLow ? 'Stock Bajo' : 'Normal'}</span></td>
                     <td><button class="btn-action" style="padding:2px 6px; font-size:0.75rem; color:red;" onclick="deleteRow(${item.id})">Eliminar</button></td>
                 `;
                 tbody.appendChild(tr);
@@ -610,13 +872,23 @@
 
         function filterTable() {
             const query = document.getElementById('search-input').value.toLowerCase();
+            const loc = document.getElementById('location-filter').value;
+
             document.querySelectorAll('#inventory-tbody tr').forEach(tr => {
-                tr.style.display = tr.innerText.toLowerCase().includes(query) ? '' : 'none';
+                const text = tr.innerText.toLowerCase();
+                const matchesQuery = text.includes(query);
+                const matchesLoc = loc === '' || text.includes(loc.toLowerCase());
+                tr.style.display = (matchesQuery && matchesLoc) ? '' : 'none';
             });
         }
 
-        function openModal() { document.getElementById('modal-anote').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal-anote').style.display = 'none'; }
+        function openModal() {
+            document.getElementById('modal-anote').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-anote').style.display = 'none';
+        }
 
         function saveSingleNote(e) {
             e.preventDefault();
@@ -639,15 +911,14 @@
             renderTable();
         }
 
-        // COPIAR AL PORTAPAPELES
         function copySelectedRows() {
             const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
             if(selectedBoxes.length === 0) {
-                alert('Por favor marca con la casilla al menos un inventario.');
+                alert('Por favor selecciona al menos un registro de inventario.');
                 return;
             }
 
-            let textToCopy = "";
+            let textToCopy = "SKU\tJoya\tUbicación\tStock\tPrecio\n";
             selectedBoxes.forEach(cb => {
                 const item = inventoryData.find(i => i.id == cb.value);
                 if(item) {
@@ -656,7 +927,7 @@
             });
 
             navigator.clipboard.writeText(textToCopy).then(() => {
-                alert(`¡Se copiaron ${selectedBoxes.length} registro(s)! Puedes pegarlos en la Pestaña 3.`);
+                alert(`Se copiaron ${selectedBoxes.length} registros al portapapeles.`);
             });
         }
 
@@ -665,54 +936,69 @@
             const ws = XLSX.utils.json_to_sheet(inventoryData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Inventario CB");
-            XLSX.writeFile(wb, "Inventario_Bolivianita.xlsx");
+            XLSX.writeFile(wb, "Inventario_Bolivianita_Joyeria.xlsx");
         }
 
-        // LOGICA DE GRAFICOS
-        function initOrUpdateCharts(dataArray) {
-            if(!dataArray || dataArray.length === 0) return;
+        function initCharts() {
+            const ctx1 = document.getElementById('barChart');
+            if(ctx1) {
+                barChartInstance = new Chart(ctx1.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Unidades en Stock',
+                            data: [],
+                            backgroundColor: '#C0A3E5',
+                            borderColor: '#6B4E9A',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            const ctx2 = document.getElementById('doughnutChart');
+            if(ctx2) {
+                doughnutChartInstance = new Chart(ctx2.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: ['#D4AF37', '#C0A3E5', '#1F1F24', '#B59328', '#6B4E9A']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            updateChartsFromData(inventoryData);
+        }
+
+        function updateChartsFromData(dataArray) {
+            if(!dataArray || dataArray.length === 0 || !barChartInstance || !doughnutChartInstance) return;
 
             const labels = dataArray.map(i => i.name || i.sku);
             const stocks = dataArray.map(i => i.stock);
             const values = dataArray.map(i => i.stock * i.price);
 
-            // Gráfico de Barras
-            const ctx1 = document.getElementById('barChart').getContext('2d');
-            if(barChartInstance) barChartInstance.destroy();
-            barChartInstance = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Stock',
-                        data: stocks,
-                        backgroundColor: '#C0A3E5'
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            barChartInstance.data.labels = labels;
+            barChartInstance.data.datasets[0].data = stocks;
+            barChartInstance.update();
 
-            // Gráfico de Rosca
-            const ctx2 = document.getElementById('doughnutChart').getContext('2d');
-            if(doughnutChartInstance) doughnutChartInstance.destroy();
-            doughnutChartInstance = new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: ['#D4AF37', '#C0A3E5', '#1F1F24', '#6B4E9A', '#B59328']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            doughnutChartInstance.data.labels = labels;
+            doughnutChartInstance.data.datasets[0].data = values;
+            doughnutChartInstance.update();
 
-            // Indicadores
             const totalVal = values.reduce((a,b) => a+b, 0);
             const totalUnits = stocks.reduce((a,b) => a+b, 0);
+            const uniqueLocs = [...new Set(dataArray.map(i => i.location))].length;
 
             document.getElementById('kpi-total-val').innerText = `$${totalVal.toFixed(2)}`;
+            document.getElementById('kpi-total-items').innerText = `${dataArray.length} Productos registrados`;
             document.getElementById('kpi-units').innerText = `${totalUnits} pzs`;
+            document.getElementById('kpi-locs').innerText = uniqueLocs;
         }
 
         function loadFromCurrentInventory() {
@@ -723,21 +1009,29 @@
                     const item = inventoryData.find(i => i.id == cb.value);
                     if(item) selectedData.push(item);
                 });
-                initOrUpdateCharts(selectedData);
-                alert(`Gráficas generadas con los ${selectedData.length} ítems seleccionados.`);
+                updateChartsFromData(selectedData);
+                alert(`Gráficas actualizadas con los ${selectedData.length} registros seleccionados.`);
             } else {
-                initOrUpdateCharts(inventoryData);
-                alert('Mostrando gráficas de todo el inventario.');
+                updateChartsFromData(inventoryData);
+                alert('Mostrando gráficas de todo el inventario activo.');
             }
         }
 
         function pasteAndGenerateChart() {
             const text = document.getElementById('paste-input').value.trim();
             if(!text) {
-                alert('Pega primero el texto copiado dentro del cuadro de texto.');
-                return;
+                navigator.clipboard.readText().then(clipText => {
+                    document.getElementById('paste-input').value = clipText;
+                    processPastedText(clipText);
+                }).catch(() => {
+                    alert('Por favor pega el texto directamente en el cuadro de texto.');
+                });
+            } else {
+                processPastedText(text);
             }
+        }
 
+        function processPastedText(text) {
             const lines = text.split('\n');
             const parsedData = [];
             lines.forEach((line, idx) => {
@@ -745,19 +1039,19 @@
                 if(cols.length >= 2) {
                     parsedData.push({
                         sku: cols[0] || `SKU-${idx}`,
-                        name: cols[1] || `Joya ${idx}`,
+                        name: cols[1] || cols[0] || `Producto ${idx}`,
                         location: cols[2] || 'Bóveda',
-                        stock: parseInt(cols[3]) || 5,
-                        price: parseFloat(cols[4]) || 100
+                        stock: parseInt(cols[3]) || parseInt(cols[2]) || 5,
+                        price: parseFloat(cols[4]) || parseFloat(cols[3]) || 100
                     });
                 }
             });
 
             if(parsedData.length > 0) {
-                initOrUpdateCharts(parsedData);
-                alert(`¡Gráfica generada con éxito a partir de ${parsedData.length} registros pegados!`);
+                updateChartsFromData(parsedData);
+                alert(`Se graficaron ${parsedData.length} registros importados.`);
             } else {
-                alert('Formato de texto no reconocido. Copia desde la tabla de la Pestaña 2.');
+                alert('No se detectaron datos válidos para procesar.');
             }
         }
     </script>
