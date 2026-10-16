@@ -6,7 +6,7 @@
     <title>Creaciones Bolivianita Joyería - Sistema de Inventarios</title>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS para leer y exportar archivos Excel -->
+    <!-- SheetJS para Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -57,8 +57,8 @@
         }
 
         .brand-logo-svg {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
         }
 
         .brand-title {
@@ -271,23 +271,12 @@
             background-color: #F8F9FA;
         }
 
-        .dashboard-toolbar {
-            background-color: var(--white);
-            padding: 1.25rem 1.5rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
         .paste-area-box {
             background-color: var(--white);
             padding: 1.25rem;
             border-radius: 10px;
             border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .paste-area-box textarea {
@@ -301,6 +290,19 @@
             outline: none;
             margin-top: 0.5rem;
             background-color: #FAFAFA;
+        }
+
+        .dashboard-toolbar-bottom {
+            background-color: var(--white);
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .kpi-grid {
@@ -374,10 +376,14 @@
 
     <header>
         <div class="brand-container">
-            <svg class="brand-logo-svg" viewBox="0 0 100 100" fill="none">
-                <circle cx="50" cy="50" r="42" stroke="#D4AF37" stroke-width="4"/>
-                <path d="M50 20 L65 38 L50 62 L35 38 Z" fill="#C0A3E5" stroke="#FFFFFF" stroke-width="1.5"/>
-                <text x="50" y="80" font-family="sans-serif" font-weight="bold" font-size="14" fill="#FFFFFF" text-anchor="middle">CB</text>
+            <!-- Logo Vectorizado Anillo CB -->
+            <svg class="brand-logo-svg" viewBox="0 0 200 200" fill="none">
+                <circle cx="100" cy="115" r="65" stroke="#C0C0C0" stroke-width="12"/>
+                <circle cx="100" cy="115" r="58" stroke="#FFFFFF" stroke-width="3"/>
+                <polygon points="100,20 135,55 100,95 65,55" fill="#C0A3E5" stroke="#D4AF37" stroke-width="4"/>
+                <line x1="65" y1="55" x2="135" y2="55" stroke="#FFFFFF" stroke-width="2"/>
+                <line x1="100" y1="20" x2="100" y2="95" stroke="#D4AF37" stroke-width="2"/>
+                <path d="M 82 125 C 70 100, 115 95, 105 115 C 95 135, 125 130, 120 115" stroke="#D4AF37" stroke-width="5" fill="none" stroke-linecap="round"/>
             </svg>
             <div class="brand-title">Creaciones <span>Bolivianita</span> Joyería</div>
         </div>
@@ -398,6 +404,16 @@
                         <span style="color:var(--purple-light); font-weight:600;">CREACIONES BOLIVIANITA</span>
                         <h1 class="hero-title">Cada pieza merece una <strong>gestión excepcional.</strong></h1>
                     </div>
+                    
+                    <div style="text-align:center; margin: 2rem 0;">
+                        <svg style="width:160px; height:160px;" viewBox="0 0 200 200" fill="none">
+                            <circle cx="100" cy="115" r="65" stroke="#C0C0C0" stroke-width="12"/>
+                            <polygon points="100,20 135,55 100,95 65,55" fill="#C0A3E5" stroke="#D4AF37" stroke-width="4"/>
+                            <line x1="65" y1="55" x2="135" y2="55" stroke="#FFFFFF" stroke-width="2"/>
+                            <path d="M 82 125 C 70 100, 115 95, 105 115 C 95 135, 125 130, 120 115" stroke="#D4AF37" stroke-width="6" fill="none"/>
+                        </svg>
+                    </div>
+
                     <div style="font-size:0.85rem; color:#71717A;">Gestión optimizada de productos y control de stock.</div>
                 </div>
 
@@ -425,8 +441,7 @@
             <div class="toolbar-area">
                 <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                     <button class="btn-action btn-gold" onclick="openModal()">+ Un solo Anote</button>
-                    
-                    <!-- Botón para importar Excel -->
+
                     <button class="btn-action btn-purple" onclick="document.getElementById('excel-file-input').click()">Importar Excel / Catálogo</button>
                     <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display:none;" onchange="importExcelFile(event)">
 
@@ -465,17 +480,7 @@
 
         <!-- PESTAÑA 3 -->
         <section id="tab-graficos" class="tab-content">
-            <div class="dashboard-toolbar">
-                <div>
-                    <h3 style="color:var(--bg-dark);">Tablero Control e Indicadores</h3>
-                    <p style="font-size:0.85rem; color:var(--text-muted);">Sincroniza y visualiza datos del inventario en esquemas gráficos.</p>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-action btn-purple" onclick="loadFromCurrentInventory()">Cargar Desde Selección Actual</button>
-                    <button class="btn-action btn-gold" onclick="pasteAndGenerateChart()">Pegar e Importar Datos para Gráfica</button>
-                </div>
-            </div>
-
+            <!-- 1. Área de Pegado Rápido -->
             <div class="paste-area-box">
                 <label style="font-weight: 600; font-size:0.85rem; color: var(--bg-dark);">
                     Área de Pegado Rápido (Copia columnas desde Excel o el Sistema y pégalas aquí):
@@ -483,6 +488,19 @@
                 <textarea id="paste-input" placeholder="Pega aquí los datos copiados (ej: SKU, Joya, Stock, Precio...)"></textarea>
             </div>
 
+            <!-- 2. Rectángulo Tablero Control e Indicadores (Alineado Abajo a la Derecha) -->
+            <div class="dashboard-toolbar-bottom">
+                <div>
+                    <h3 style="color:var(--bg-dark);">Tablero Control e Indicadores</h3>
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Sincroniza y visualiza datos del inventario en esquemas gráficos.</p>
+                </div>
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button class="btn-action btn-purple" onclick="loadFromCurrentInventory()">Cargar Desde Selección Actual</button>
+                    <button class="btn-action btn-gold" onclick="pasteAndGenerateChart()">Pegar e Importar Datos para Gráfica</button>
+                </div>
+            </div>
+
+            <!-- 3. Indicadores KPI -->
             <div class="kpi-grid">
                 <div class="kpi-card">
                     <div class="kpi-title">Total Inventario Valorizado</div>
@@ -501,6 +519,7 @@
                 </div>
             </div>
 
+            <!-- 4. Gráficos de Control -->
             <div class="charts-main-grid">
                 <div class="chart-box">
                     <h4 style="margin-bottom:1rem;">Nivel de Stock por Joya / Producto</h4>
@@ -650,7 +669,6 @@
             renderTable();
         }
 
-        // IMPORTAR ARCHIVO EXCEL DE CATÁLOGO / INVENTARIO
         function importExcelFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -669,7 +687,6 @@
                 }
 
                 const importedItems = [];
-                // Recorrer filas omitiendo el encabezado
                 for (let i = 1; i < jsonData.length; i++) {
                     const row = jsonData[i];
                     if (row.length > 0) {
@@ -721,7 +738,6 @@
             XLSX.writeFile(wb, "Inventario_Bolivianita.xlsx");
         }
 
-        // CONTROL DE GRÁFICOS
         function initOrUpdateCharts(dataArray) {
             if(!dataArray || dataArray.length === 0) return;
 
