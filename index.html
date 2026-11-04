@@ -1,836 +1,772 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creaciones Bolivianita Joyería - Sistema de Inventarios</title>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <style>
-        :root {
-            --bg-dark: #1F1F24;
-            --gold: #D4AF37;
-            --gold-hover: #B59328;
-            --purple-light: #C0A3E5;
-            --purple-soft: #EDE4F7;
-            --purple-dark: #6B4E9A;
-            --text-dark: #232328;
-            --text-muted: #71717A;
-            --border-color: #E4E4E7;
-            --white: #FFFFFF;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
-        }
-
-        body {
-            background-color: #F8F9FA;
-            color: var(--text-dark);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        header {
-            background-color: var(--bg-dark);
-            color: var(--white);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 1.5rem;
-            height: 70px;
-            border-bottom: 2px solid var(--gold);
-            flex-shrink: 0;
-        }
-
-        .brand-container {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .brand-logo-svg {
-            width: 46px;
-            height: 46px;
-        }
-
-        /* TÍTULO PRINCIPAL MÁS GRANDE */
-        .brand-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--white);
-            letter-spacing: 0.5px;
-        }
-
-        .brand-title span {
-            color: var(--gold);
-        }
-
-        nav.tabs-nav {
-            display: flex;
-            height: 100%;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: #A1A1AA;
-            padding: 0 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        .tab-btn:hover {
-            color: var(--white);
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .tab-btn.active {
-            color: var(--gold);
-            border-bottom-color: var(--gold);
-            background-color: rgba(212, 175, 55, 0.08);
-        }
-
-        main {
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .tab-content {
-            display: none;
-            height: 100%;
-            width: 100%;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* PESTAÑA 1 */
-        .split-login-container {
-            display: flex;
-            height: 100%;
-            width: 100%;
-        }
-
-        .login-left-panel {
-            flex: 1;
-            background-color: var(--bg-dark);
-            color: var(--white);
-            padding: 3rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .hero-title {
-            font-size: 2.2rem;
-            font-weight: 300;
-            margin-top: 1.5rem;
-            color: var(--white);
-        }
-
-        .hero-title strong {
-            font-weight: 700;
-            color: var(--gold);
-            display: block;
-        }
-
-        .login-right-panel {
-            flex: 1;
-            background-color: var(--white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        .btn-gold {
-            background-color: var(--gold);
-            color: var(--bg-dark);
-            font-weight: 700;
-            padding: 0.85rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        /* PESTAÑA 2: INVENTARIOS CON BARRAS EN LA PARTE INFERIOR */
-        #tab-inventarios {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            background-color: #F4F4F6;
-        }
-
-        .toolbar-top {
-            background-color: var(--white);
-            padding: 0.8rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-        .toolbar-bottom {
-            background-color: var(--white);
-            padding: 0.8rem 1.5rem;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            background-color: var(--white);
-            border: 1px solid var(--border-color);
-            color: var(--text-dark);
-            padding: 0.6rem 1rem;
-            border-radius: 6px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-purple {
-            background-color: var(--purple-light);
-            color: var(--bg-dark);
-            border: none;
-        }
-
-        .grid-container {
-            flex: 1;
-            overflow: auto;
-            padding: 1rem 1.5rem;
-        }
-
-        .excel-table-wrapper {
-            background-color: var(--white);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-
-        table.excel-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.88rem;
-        }
-
-        table.excel-table th {
-            background-color: #2A2A32;
-            color: var(--white);
-            padding: 0.75rem 1rem;
-            border-bottom: 2px solid var(--gold);
-        }
-
-        table.excel-table td {
-            padding: 0.65rem 1rem;
-            border-bottom: 1px solid #EAEAEA;
-        }
-
-        /* PESTAÑA 3: RECTÁNGULO UNIFICADO */
-        #tab-graficos {
-            padding: 1.5rem;
-            overflow-y: auto;
-            height: 100%;
-            background-color: #F8F9FA;
-        }
-
-        .unified-control-card {
-            background-color: var(--white);
-            padding: 1.25rem 1.5rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        }
-
-        .unified-header h3 {
-            color: var(--bg-dark);
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .paste-area-box textarea {
-            width: 100%;
-            height: 85px;
-            border: 1px dashed var(--gold);
-            border-radius: 6px;
-            padding: 0.75rem;
-            font-family: monospace;
-            font-size: 0.85rem;
-            outline: none;
-            background-color: #FAFAFA;
-        }
-
-        .card-bottom-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .kpi-card {
-            background-color: var(--white);
-            padding: 1.25rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            border-left: 4px solid var(--gold);
-        }
-
-        .kpi-card.purple { border-left-color: var(--purple-light); }
-        .kpi-card.dark { border-left-color: var(--bg-dark); }
-
-        .kpi-title {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .kpi-value {
-            font-size: 1.7rem;
-            font-weight: 700;
-            color: var(--bg-dark);
-            margin-top: 0.4rem;
-        }
-
-        .charts-main-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .chart-box {
-            background-color: var(--white);
-            padding: 1.25rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            min-height: 320px;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-card {
-            background-color: var(--white);
-            border-radius: 12px;
-            width: 100%;
-            max-width: 500px;
-            padding: 1.8rem;
-            border-top: 4px solid var(--gold);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creaciones Bolivianita Joyería</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--ink:#1F1F24;--ink2:#2A2A32;--gold:#D4AF37;--gold2:#A8861F;--pl:#C0A3E5;--ps:#F3EDFB;--pd:#6B4E9A;--pm:#8E3AB0;--tx:#232328;--mu:#71717A;--bd:#E6E3EC;--ok:#0F9D58;--warn:#D97706;--bad:#DC2626;--bg:#F7F5FA}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Montserrat',sans-serif}
+h1,h2,h3,h4,.brand,.price{font-family:'Cinzel',serif}
+body{background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column}
+button{cursor:pointer;font-family:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+header{background:rgba(31,31,36,.96);backdrop-filter:blur(8px);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 1.6rem;height:74px;border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:50;gap:1rem}
+.brand-box{display:flex;align-items:center;gap:12px}
+.brand-box img{width:46px;height:46px;object-fit:contain}
+.brand{font-size:1.2rem;font-weight:700;letter-spacing:1px;white-space:nowrap}.brand span{color:var(--gold)}
+nav{display:flex;height:100%}
+.tab-btn{background:none;border:0;color:#A9A6B5;padding:0 1.15rem;font-size:.88rem;font-weight:600;border-bottom:3px solid transparent;transition:.2s}
+.tab-btn:hover{color:#fff}.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(212,175,55,.08)}
+.hright{display:flex;align-items:center;gap:14px}
+.btn-link{background:none;border:0;color:#fff;font-weight:700;font-size:.9rem}
+.btn-outline{border:2px solid var(--gold);background:none;color:var(--gold);padding:.4rem 1.1rem;border-radius:8px;font-weight:700;font-size:.9rem;transition:.2s}
+.btn-outline:hover{background:var(--gold);color:var(--ink)}
+.cart-btn{background:rgba(255,255,255,.08);border:1px solid rgba(212,175,55,.5);color:var(--gold);border-radius:8px;padding:.45rem .85rem;font-weight:700;font-size:.85rem;display:none}
+.cart-btn b{background:var(--gold);color:var(--ink);border-radius:10px;padding:1px 8px;margin-left:6px}
+.account{position:relative}
+.acc-btn{display:flex;align-items:center;gap:6px;background:none;border:0}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--gold);background:linear-gradient(135deg,var(--pd),var(--pm));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.chev{transition:transform .2s}.account.open .chev{transform:rotate(180deg)}
+.menu{position:absolute;right:0;top:56px;background:#fff;color:var(--tx);border-radius:12px;min-width:270px;box-shadow:0 14px 36px rgba(0,0,0,.28);display:none;overflow:hidden;border-top:3px solid var(--gold)}
+.account.open .menu{display:block}
+.menu-head{padding:1rem;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bd)}
+.menu-head .avatar{width:40px;height:40px}
+.menu-head small{color:var(--mu);display:block;font-size:.74rem;word-break:break-all}
+.role{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--ps);color:var(--pd);margin-top:3px}.role.emp{background:var(--pl);color:var(--ink)}.role.adm{background:var(--gold);color:var(--ink)}
+.menu button{width:100%;text-align:left;background:none;border:0;padding:.8rem 1rem;font-size:.88rem;font-weight:600}
+.menu button:hover{background:var(--ps)}.menu .out{color:var(--bad)}
+.rsw-box{padding:.7rem 1rem;border-bottom:1px solid var(--bd);font-size:.7rem;color:var(--mu);font-weight:700;letter-spacing:.5px}
+.rsw{display:flex;gap:4px;margin-top:6px}
+.menu .rsw button{padding:.4rem .3rem;font-size:.7rem;border:1px solid var(--bd);border-radius:6px;text-align:center;flex:1}
+.menu .rsw button.on{background:var(--pd);color:#fff;border-color:var(--pd)}
+main{flex:1}.tab-content{display:none}.tab-content.active{display:block}
+.hero{background:radial-gradient(circle at 85% 20%,#3b2764 0,transparent 55%),var(--ink);color:#fff;padding:3.5rem 1.5rem}
+.hero-in{max-width:1200px;margin:auto;display:grid;grid-template-columns:1.2fr .8fr;gap:2rem;align-items:center}
+.hero h1{font-size:clamp(1.9rem,4.5vw,3.2rem);line-height:1.15;letter-spacing:1px}
+.hero p{margin-top:1rem;color:#cfc6e0;line-height:1.7;max-width:520px}
+.hero .tags{display:flex;gap:10px;margin-top:1.4rem;flex-wrap:wrap}
+.hero .tags span{border:1px solid rgba(212,175,55,.5);color:var(--gold);padding:.35rem .9rem;border-radius:20px;font-size:.78rem;font-weight:600}
+.gem{width:100%;max-width:280px;margin:auto;filter:drop-shadow(0 0 40px rgba(192,163,229,.45))}
+.marquee{background:#17171b;padding:1.6rem 0 2rem;overflow:hidden}
+.marquee h3{color:var(--pl);text-align:center;font-size:.95rem;letter-spacing:4px;margin-bottom:1rem}
+.track{display:flex;width:max-content;animation:slide 50s linear infinite}
+.marquee:hover .track{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(-50%)}}
+.mq{width:200px;height:200px;padding-right:14px;flex-shrink:0}
+.mq img{width:100%;height:100%;object-fit:cover;border-radius:12px;border:1px solid rgba(212,175,55,.35)}
+@media(prefers-reduced-motion:reduce){.track{animation:none}}
+.wrap{max-width:1200px;margin:0 auto;padding:2.2rem 1.5rem}
+.sec-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem}
+.sec-title h2{font-size:1.6rem;color:var(--ink)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--bd);background:#fff;border-radius:20px;padding:.35rem .95rem;font-size:.8rem;font-weight:600;cursor:pointer}
+.chip.on{background:var(--pd);color:#fff;border-color:var(--pd)}
+.admin-bar{margin-bottom:1.4rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.7rem}
+.card{background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--bd);display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+.card.gate{cursor:pointer}
+.card:hover{box-shadow:0 14px 32px rgba(60,30,100,.15);transform:translateY(-3px)}
+.im{aspect-ratio:4/4.4;position:relative;background:#eee;overflow:hidden}.im img{width:100%;height:100%;object-fit:cover;transition:transform .4s}.card:hover .im img{transform:scale(1.05)}
+.cod{position:absolute;left:10px;bottom:10px;background:rgba(255,255,255,.94);padding:3px 9px;border-radius:5px;font-size:.72rem;font-weight:700}
+.stkb{position:absolute;right:10px;top:10px;background:var(--ink);color:var(--gold);padding:3px 9px;border-radius:5px;font-size:.72rem;font-weight:700}
+.cb{padding:1.1rem 1.2rem 1.3rem;display:flex;flex-direction:column;gap:.65rem;border-top:2px solid var(--gold);flex:1}
+.ct{font-weight:600;font-size:.92rem;line-height:1.35}
+.price{font-size:1.35rem;font-weight:700;color:var(--gold2)}
+.qty{display:flex;align-items:center;justify-content:center;gap:10px}
+.qb{width:34px;height:34px;border-radius:50%;border:1px solid #ccc;background:#fff;font-weight:700;font-size:1.1rem}.qb:hover{background:var(--ps);border-color:var(--pd)}
+.qty input{width:56px;text-align:center;border:1px solid #ddd;border-radius:6px;padding:6px;font-weight:700}
+.btn{border:1px solid var(--bd);background:#fff;color:var(--tx);padding:.6rem 1rem;border-radius:8px;font-size:.85rem;font-weight:600;transition:.15s;display:inline-block}
+.btn:hover{border-color:var(--pd)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-p{background:var(--pd);color:#fff;border-color:var(--pd)}.btn-p:hover{background:#573f80}
+.btn-g{background:var(--gold);color:var(--ink);border-color:var(--gold)}.btn-g:hover{background:#c29f2c}
+.btn-l{background:var(--pl);color:var(--ink);border-color:var(--pl)}
+.btn-d{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5}
+.btn-sm{padding:.3rem .65rem;font-size:.78rem}
+.promise{background:var(--ps);border-top:3px solid var(--pd);border-bottom:2px solid var(--gold);padding:3rem 1.5rem}
+.promise h2{text-align:center;color:var(--pd);margin-bottom:2rem}
+.pg{max-width:1100px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2rem;text-align:center}
+.pg h3{font-size:1rem;margin:.6rem 0 .4rem}.pg p{font-size:.86rem;color:var(--mu);line-height:1.6}
+.pg svg{width:40px;height:40px;fill:none;stroke:var(--pd);stroke-width:1.6}
+.panel{background:#fff;border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:1.6rem}
+.panel>h3{padding:1rem 1.1rem;font-size:1.05rem;border-bottom:1px solid var(--bd)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;padding:.9rem 1.1rem;align-items:center;background:#FAFAFB;border-bottom:1px solid var(--bd)}
+.toolbar.bottom{border-top:1px solid var(--bd);border-bottom:0}
+.toolbar input[type=text]{flex:1;min-width:200px;padding:.6rem .8rem;border:1px solid var(--bd);border-radius:8px}
+.sp{flex:1}.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.86rem;min-width:820px}
+th{background:var(--ink);color:#fff;padding:.75rem .9rem;text-align:left;border-bottom:2px solid var(--gold);white-space:nowrap}
+td{padding:.6rem .9rem;border-bottom:1px solid #eee;vertical-align:middle}
+tr:hover td{background:#FBF9FE}
+td input.mini{width:70px;text-align:center;border:1px solid #ddd;border-radius:6px;padding:4px}
+td input.nm{width:100%;min-width:190px;border:1px solid #ddd;border-radius:6px;padding:5px 8px;font-size:.85rem}
+td img.th{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--bd)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.stk{display:flex;align-items:center;gap:6px}.stk .qb{width:26px;height:26px;font-size:.9rem}
+.badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700;color:#fff;background:var(--ok)}.badge.low{background:var(--warn)}.badge.out{background:var(--bad)}
+.empty{padding:2.5rem 1rem;text-align:center;color:var(--mu)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:1.2rem}
+.kpi{background:#fff;border:1px solid var(--bd);border-left:4px solid var(--gold);border-radius:10px;padding:1rem 1.2rem}
+.kpi small{color:var(--mu);font-weight:600;font-size:.76rem}.kpi b{display:block;font-size:1.5rem;margin-top:2px}.kpi.warn{border-left-color:var(--warn)}
+.cg{display:grid;grid-template-columns:2fr 1fr;gap:1.2rem;margin-top:1.2rem}.cg .full{grid-column:1/-1}
+.cbox{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:1.1rem}
+.cbox h4{font-size:.95rem;margin-bottom:.8rem}.cv{position:relative;height:270px}
+.src{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+textarea{width:100%;height:90px;border:1px dashed var(--gold);border-radius:8px;padding:.7rem;font-family:monospace;font-size:.82rem;background:#FAFAFA}
+.alert{background:#FEF3C7;border:1px solid #FCD34D;color:#92400E;padding:.7rem 1rem;border-radius:8px;font-size:.85rem;font-weight:600;margin-top:1rem}
+footer{background:var(--ink);color:#fff;padding:2.5rem 2rem 1rem;border-top:2px solid var(--gold)}
+.fc{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem}
+.fc h4{color:var(--gold);margin-bottom:.7rem}.fc p{font-size:.86rem;color:#d1d1d6;line-height:1.7}
+.soc{display:flex;gap:18px;margin-top:1rem}
+.soc a{width:44px;height:44px;background:#fff;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.25s}
+.soc a:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(212,175,55,.4)}.soc img{width:24px;height:24px;object-fit:contain}
+.fb{max-width:1200px;margin:1.8rem auto 0;padding-top:1rem;border-top:1px solid rgba(255,255,255,.1);text-align:center;font-size:.78rem;color:var(--mu)}
+.ov{position:fixed;inset:0;background:rgba(15,15,18,.7);display:none;justify-content:center;align-items:center;z-index:200;backdrop-filter:blur(3px);padding:1rem}
+.ov.show{display:flex}
+.md{background:#fff;border-radius:16px;width:100%;max-width:470px;padding:1.8rem;border-top:4px solid var(--gold);max-height:94vh;overflow:auto}
+.md h3{margin-bottom:.4rem}.md>p{color:var(--mu);font-size:.88rem;margin-bottom:1.1rem}
+.md label{font-size:.78rem;font-weight:600;color:var(--mu)}
+.fi{width:100%;padding:.7rem;border:1px solid var(--bd);border-radius:8px;margin:.25rem 0 .9rem;font-size:.9rem}
+.mb{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--ps);border-radius:10px;padding:4px;margin-bottom:1.2rem}
+.seg button{border:0;background:none;padding:.6rem;border-radius:8px;font-weight:700;font-size:.85rem;color:var(--pd)}
+.seg button.on{background:var(--pd);color:#fff}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:.3rem 0 1rem}
+.rc{border:2px solid var(--bd);border-radius:10px;padding:.6rem;background:#fff;text-align:left;font-size:.7rem;color:var(--mu);line-height:1.3}
+.rc b{display:block;color:var(--tx);font-size:.82rem;margin-bottom:2px}
+.rc.on{border-color:var(--gold);background:#FFFBEA}
+.photo-pick{display:flex;align-items:center;gap:14px;margin-bottom:1rem}.photo-pick .avatar{width:60px;height:60px;font-size:1.2rem}
+.prev{width:100%;height:150px;border:2px dashed var(--pl);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:.8rem;overflow:hidden;margin:.3rem 0 .6rem;background:#FAF8FD}.prev img{width:100%;height:100%;object-fit:cover}
+.li{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:.6rem 0;border-bottom:1px solid #eee;font-size:.85rem}
+.total{display:flex;justify-content:space-between;font-weight:700;padding:.9rem 0;font-size:1.05rem}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:.8rem 1.3rem;border-radius:10px;border-left:4px solid var(--gold);font-size:.88rem;font-weight:600;transition:.3s;z-index:300;opacity:0;max-width:90vw}
+#toast.show{transform:translateX(-50%);opacity:1}
+@media(max-width:860px){header{height:auto;flex-wrap:wrap;padding:.6rem 1rem}nav{order:3;width:100%;overflow-x:auto;height:44px}.cg{grid-template-columns:1fr}.brand{font-size:1rem}.hero-in{grid-template-columns:1fr}.gem{max-width:170px}}
+</style>
 </head>
 <body>
 
-    <header>
-        <div class="brand-container">
-            <!-- LOGO OFICIAL VECTORIZADO FIEL A LA IMAGEN -->
-            <svg class="brand-logo-svg" viewBox="0 0 200 200" fill="none">
-                <circle cx="100" cy="115" r="62" stroke="#C0C0C0" stroke-width="10"/>
-                <polygon points="100,20 135,55 100,95 65,55" fill="#C0A3E5" stroke="#D4AF37" stroke-width="3"/>
-                <line x1="65" y1="55" x2="135" y2="55" stroke="#FFFFFF" stroke-width="2"/>
-                <path d="M 82 125 C 70 100, 115 95, 105 115 C 95 135, 125 130, 120 115" stroke="#D4AF37" stroke-width="5" fill="none" stroke-linecap="round"/>
-            </svg>
-            <div class="brand-title">Creaciones <span>Bolivianita</span> Joyería</div>
-        </div>
+<header>
+  <div class="brand-box">
+    <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+    <div class="brand">Creaciones <span>Bolivianita</span> Joyería</div>
+  </div>
+  <nav id="nav"></nav>
+  <div class="hright">
+    <button class="cart-btn" id="cart-btn" onclick="openCart()">Carrito<b id="cart-n">0</b></button>
+    <div id="auth-zone"></div>
+  </div>
+</header>
 
-        <nav class="tabs-nav">
-            <button class="tab-btn active" id="btn-tab-inicio" onclick="openTab('inicio')">Inicio</button>
-            <button class="tab-btn" id="btn-tab-inventarios" onclick="openTab('inventarios')">Sistema de Inventarios</button>
-            <button class="tab-btn" id="btn-tab-graficos" onclick="openTab('graficos')">Esquemas y Gráficos</button>
-        </nav>
-    </header>
-
-    <main>
-        <!-- PESTAÑA 1 -->
-        <section id="tab-inicio" class="tab-content active">
-            <div class="split-login-container">
-                <div class="login-left-panel">
-                    <div>
-                        <span style="color:var(--purple-light); font-weight:600;">CREACIONES BOLIVIANITA</span>
-                        <h1 class="hero-title">Cada pieza merece una <strong>gestión excepcional.</strong></h1>
-                    </div>
-                    
-                    <div style="text-align:center; margin: 2rem 0;">
-                        <svg style="width:170px; height:170px;" viewBox="0 0 200 200" fill="none">
-                            <circle cx="100" cy="115" r="62" stroke="#C0C0C0" stroke-width="10"/>
-                            <polygon points="100,20 135,55 100,95 65,55" fill="#C0A3E5" stroke="#D4AF37" stroke-width="3"/>
-                            <line x1="65" y1="55" x2="135" y2="55" stroke="#FFFFFF" stroke-width="2"/>
-                            <path d="M 82 125 C 70 100, 115 95, 105 115 C 95 135, 125 130, 120 115" stroke="#D4AF37" stroke-width="5" fill="none"/>
-                        </svg>
-                    </div>
-
-                    <div style="font-size:0.85rem; color:#71717A;">Gestión optimizada de productos y control de stock.</div>
-                </div>
-
-                <div class="login-right-panel">
-                    <div class="login-card">
-                        <h2 style="margin-bottom:0.5rem; color:var(--bg-dark);">Bienvenido a tu joyería</h2>
-                        <p style="margin-bottom:1.5rem; color:var(--text-muted); font-size:0.9rem;">Ingresa tus datos para acceder al sistema.</p>
-                        
-                        <div class="form-group">
-                            <label>Usuario</label>
-                            <input type="text" class="form-control" value="admin@bolivianita.com">
-                        </div>
-                        <div class="form-group">
-                            <label>Contraseña</label>
-                            <input type="password" class="form-control" value="••••••••">
-                        </div>
-                        <button type="button" class="btn-gold" onclick="openTab('inventarios')">Iniciar sesión</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PESTAÑA 2 -->
-        <section id="tab-inventarios" class="tab-content">
-            <div class="toolbar-top">
-                <input type="text" id="search-input" placeholder="Buscar por código, joya..." class="form-control" style="width:250px; padding:0.4rem 0.8rem;" onkeyup="filterTable()">
-            </div>
-
-            <div class="grid-container">
-                <div class="excel-table-wrapper">
-                    <table class="excel-table" id="inventory-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px; text-align: center;">
-                                    <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)">
-                                </th>
-                                <th>Código SKU</th>
-                                <th>Joya / Producto</th>
-                                <th>Ubicación</th>
-                                <th>Stock Actual</th>
-                                <th>Stock Mín.</th>
-                                <th>Precio Unit. ($)</th>
-                                <th>Valor Total ($)</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventory-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- BOTONES TRASLADADOS A LA PARTE INFERIOR -->
-            <div class="toolbar-bottom">
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <button class="btn-action btn-gold" onclick="openModal()">+ Un solo Anote</button>
-                    <button class="btn-action btn-purple" onclick="document.getElementById('excel-file-input').click()">Importar Excel / Catálogo</button>
-                    <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display:none;" onchange="importExcelFile(event)">
-                    <button class="btn-action btn-purple" onclick="copySelectedRows()">Copiar Selección al Portapapeles</button>
-                    <button class="btn-action" onclick="exportToExcel()">Exportar a Excel</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- PESTAÑA 3: RECTÁNGULO UNIFICADO -->
-        <section id="tab-graficos" class="tab-content">
-            <div class="unified-control-card">
-                <div class="unified-header">
-                    <h3>Sincroniza y visualiza datos del inventario en esquemas gráficos.</h3>
-                </div>
-
-                <div class="paste-area-box">
-                    <textarea id="paste-input" placeholder="Pega aquí los datos copiados (ej: SKU, Joya, Stock, Precio...)"></textarea>
-                </div>
-
-                <div class="card-bottom-actions">
-                    <button class="btn-action btn-purple" onclick="loadFromCurrentInventory()">Cargar Desde Selección Actual</button>
-                    <button class="btn-action btn-gold" onclick="pasteAndGenerateChart()">Pegar e Importar Datos para Gráfica</button>
-                </div>
-            </div>
-
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-title">Total Inventario Valorizado</div>
-                    <div class="kpi-value" id="kpi-total-val">$0.00</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);" id="kpi-total-items">0 Productos registrados</div>
-                </div>
-                <div class="kpi-card purple">
-                    <div class="kpi-title">Total Unidades en Stock</div>
-                    <div class="kpi-value" id="kpi-units">0 pzs</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">Existencia total física</div>
-                </div>
-                <div class="kpi-card dark">
-                    <div class="kpi-title" style="color:#C0A3E5;">Ubicaciones Activas</div>
-                    <div class="kpi-value" style="color:#FFF;" id="kpi-locs">0</div>
-                    <div style="font-size:0.8rem; color:#AAA;">Puntos de control</div>
-                </div>
-            </div>
-
-            <div class="charts-main-grid">
-                <div class="chart-box">
-                    <h4 style="margin-bottom:1rem;">Nivel de Stock por Joya / Producto</h4>
-                    <div style="height:250px; position:relative;">
-                        <canvas id="barChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-box">
-                    <h4 style="margin-bottom:1rem;">Distribución por Valor</h4>
-                    <div style="height:250px; position:relative;">
-                        <canvas id="doughnutChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="modal-anote">
-        <div class="modal-card">
-            <h3 style="margin-bottom:1rem; color:var(--bg-dark);">Vincular Codificación e Inventario</h3>
-            <form onsubmit="saveSingleNote(event)">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <div class="form-group">
-                        <label>Código SKU</label>
-                        <input type="text" id="m-sku" class="form-control" placeholder="JOY-001" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Nombre de Joya</label>
-                        <input type="text" id="m-name" class="form-control" placeholder="Anillo Oro 18K" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Ubicación</label>
-                        <input type="text" id="m-loc" class="form-control" value="Bóveda Principal">
-                    </div>
-                    <div class="form-group">
-                        <label>Stock Inicial</label>
-                        <input type="number" id="m-stock" class="form-control" value="10" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Stock Mínimo</label>
-                        <input type="number" id="m-min" class="form-control" value="2" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Precio ($)</label>
-                        <input type="number" step="0.01" id="m-price" class="form-control" value="150.00" required>
-                    </div>
-                </div>
-                <div style="margin-top:1rem; display:flex; justify-content:flex-end; gap:10px;">
-                    <button type="button" class="btn-action" onclick="closeModal()">Cancelar</button>
-                    <button type="submit" class="btn-action btn-gold">Guardar</button>
-                </div>
-            </form>
-        </div>
+<main>
+  <!-- CATÁLOGO -->
+  <section id="tab-inicio" class="tab-content active">
+    <div class="hero"><div class="hero-in">
+      <div>
+        <h1>Joyas con el alma de la bolivianita</h1>
+        <p>Piezas artesanales en oro 18k y plata 925, con bolivianita y ametrino, hechas en Cochabamba.</p>
+        <div class="tags"><span>Oro 18k</span><span>Plata 925</span><span>Bolivianita</span><span>Ametrino</span></div>
+      </div>
+      <svg class="gem" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C0A3E5"/><stop offset=".55" stop-color="#8E3AB0"/><stop offset="1" stop-color="#D4AF37"/></linearGradient></defs>
+        <polygon points="100,12 168,58 152,150 100,188 48,150 32,58" fill="url(#g1)" stroke="#D4AF37" stroke-width="2"/>
+        <g fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1.2"><path d="M32 58H168M100 12L70 58L100 188L130 58Z"/><path d="M70 58L48 150M130 58L152 150M70 58L100 100L130 58"/></g></svg>
+    </div></div>
+    <div class="marquee"><h3>NUEVAS NOVEDADES</h3><div class="track" id="track"></div></div>
+    <div class="wrap">
+      <div class="sec-title"><h2>Nuestras joyas</h2><div class="chips" id="chips"></div></div>
+      <div class="admin-bar" id="admin-bar"></div>
+      <div class="grid" id="catalog"></div>
     </div>
+    <div class="promise">
+      <h2>Nuestra promesa para ti</h2>
+      <div class="pg">
+        <div><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><h3>Envíos a nivel nacional</h3><p>Cuidamos el valor sentimental de tus joyas con envíos seguros y confiables.</p></div>
+        <div><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><h3>Pagos seguros</h3><p>Paga con tarjeta o QR con total seguridad.</p></div>
+        <div><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><h3>Soporte en línea</h3><p>Nuestro equipo te ayuda con cualquier duda.</p></div>
+      </div>
+    </div>
+  </section>
 
-    <script>
-        let inventoryData = [
-            { id: 1, sku: 'JOY-BOL-01', name: 'Anillo Bolivianita Oro 18k', location: 'Bóveda Principal', stock: 8, min: 2, price: 450.00 },
-            { id: 2, sku: 'JOY-BOL-02', name: 'Dije Ametrino Tallado', location: 'Vitrina Exhibición A', stock: 15, min: 5, price: 280.00 },
-            { id: 3, sku: 'JOY-SIL-05', name: 'Pulsera Plata 925', location: 'Taller de Joyería', stock: 3, min: 4, price: 95.00 }
-        ];
+  <!-- INVENTARIOS (empleado y administrador) -->
+  <section id="tab-inventarios" class="tab-content">
+    <div class="wrap">
+      <div class="sec-title"><h2>Sistema de inventarios</h2></div>
+      <div class="stats">
+        <div class="kpi"><small>Productos</small><b id="i-prod">0</b></div>
+        <div class="kpi"><small>Unidades en stock</small><b id="i-units">0</b></div>
+        <div class="kpi"><small>Valor del inventario</small><b id="i-val">Bs. 0</b></div>
+        <div class="kpi warn"><small>Con stock bajo o agotado</small><b id="i-low">0</b></div>
+      </div>
+      <div class="panel" style="margin-bottom:0">
+        <div class="toolbar">
+          <input type="text" id="search" placeholder="Buscar por código, joya o ubicación…" oninput="renderInv()">
+          <button class="btn btn-g" onclick="pasteFromClipboard()">📋 Pegar lista</button>
+          <button class="btn btn-p" onclick="openModal('m-add')">+ Agregar joya</button>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th style="width:36px"><input type="checkbox" onclick="toggleAll(this)"></th><th>Código SKU</th><th>Joya / Producto</th><th>Ubicación</th><th>Stock</th><th>Mín.</th><th>Precio (Bs.)</th><th>Valor total</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table></div>
+        <div id="inv-empty" class="empty" style="display:none"><h4>Tu inventario está vacío</h4><p>Pega una lista copiada del catálogo, importa un Excel o agrega una joya.</p></div>
+        <div class="toolbar bottom">
+          <button class="btn" onclick="copyRows()">Copiar selección</button>
+          <button class="btn" onclick="document.getElementById('xl').click()">Importar Excel</button>
+          <input type="file" id="xl" accept=".xlsx,.xls" hidden onchange="importXL(event)">
+          <button class="btn" onclick="exportXL()">Exportar a Excel</button>
+          <span class="sp"></span>
+          <button class="btn btn-d" onclick="delSelected()">Eliminar selección</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        let barChartInstance = null;
-        let doughnutChartInstance = null;
+  <!-- GESTIÓN DE TIENDA (solo administrador) -->
+  <section id="tab-tienda" class="tab-content">
+    <div class="wrap">
+      <div class="sec-title"><h2>Gestión de tienda</h2><button class="btn btn-g" onclick="openProd()">+ Agregar Nuevo Producto al Catálogo</button></div>
+      <div class="panel"><h3>Productos del catálogo</h3><div class="tw"><table>
+        <thead><tr><th></th><th>Código SKU</th><th>Producto</th><th>Precio (Bs.)</th><th>Stock</th><th></th></tr></thead>
+        <tbody id="store-body"></tbody></table></div></div>
+      <div class="panel"><h3>Pedidos de clientes</h3><div class="tw"><table>
+        <thead><tr><th>Fecha</th><th>Cliente</th><th>Contacto</th><th>Pago</th><th>Productos</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="orders-body"></tbody></table></div>
+        <div id="orders-empty" class="empty">Todavía no hay pedidos.</div></div>
+    </div>
+  </section>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderTable();
-        });
+  <!-- GRÁFICOS (solo administrador) -->
+  <section id="tab-graficos" class="tab-content">
+    <div class="wrap">
+      <div class="sec-title"><h2>Esquemas y gráficos</h2></div>
+      <div class="src">
+        <span style="font-size:.85rem;font-weight:600">Datos a graficar:</span>
+        <button class="chip on" id="s-all" onclick="setSrc('all')">Todo el inventario</button>
+        <button class="chip" id="s-sel" onclick="setSrc('sel')">Solo lo seleccionado</button>
+        <button class="chip" id="s-paste" onclick="setSrc('paste')">Datos pegados</button>
+      </div>
+      <div id="paste-box" style="display:none;margin-bottom:1rem">
+        <textarea id="paste-in" placeholder="Pega aquí: Código ⇥ Nombre ⇥ Cantidad ⇥ Precio (opcional)"></textarea>
+        <div style="text-align:right;margin-top:8px"><button class="btn btn-p" onclick="renderCharts()">Graficar datos pegados</button></div>
+      </div>
+      <div id="g-alert" class="alert" style="display:none"></div>
+      <div id="g-body">
+        <div class="stats">
+          <div class="kpi"><small>Valor total</small><b id="g-val">Bs. 0</b></div>
+          <div class="kpi"><small>Unidades</small><b id="g-units">0</b></div>
+          <div class="kpi"><small>Joya más valiosa</small><b id="g-top" style="font-size:1rem">—</b></div>
+          <div class="kpi warn"><small>Por reponer</small><b id="g-low">0</b></div>
+        </div>
+        <div class="cg">
+          <div class="cbox"><h4>Stock actual vs. mínimo por joya</h4><div class="cv"><canvas id="c1"></canvas></div></div>
+          <div class="cbox"><h4>Distribución del valor</h4><div class="cv"><canvas id="c2"></canvas></div></div>
+          <div class="cbox full"><h4>Valor por ubicación (Bs.)</h4><div class="cv" style="height:220px"><canvas id="c3"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
 
-        function openTab(tabName) {
-            const contents = document.querySelectorAll('.tab-content');
-            contents.forEach(content => content.style.display = 'none');
+<footer>
+  <div class="fc">
+    <div><h4>Creaciones Bolivianita</h4><p>Joyería artesanal de alta precisión en oro 18k, plata 925 y gemas de bolivianita y ametrino.</p></div>
+    <div><h4>Contacto</h4><p>Cochabamba, Bolivia<br>WhatsApp: +591 70000000<br>contacto@bolivianita.com</p></div>
+    <div><h4>Horario de atención</h4><p>Lunes a viernes: 09:00 - 19:00<br>Sábados: 09:00 - 13:00</p></div>
+    <div><h4>Síguenos</h4><p>Conéctate con nosotros:</p>
+      <div class="soc">
+        <a href="https://facebook.com" target="_blank" title="Facebook"><img src="facebook (1).png" alt="Facebook"></a>
+        <a href="https://instagram.com" target="_blank" title="Instagram"><img src="instagram.png" alt="Instagram"></a>
+        <a href="https://tiktok.com" target="_blank" title="TikTok"><img src="tik-tok.png" alt="TikTok"></a>
+      </div>
+    </div>
+  </div>
+  <div class="fb">© 2026 Creaciones Bolivianita Joyería. Todos los derechos reservados.</div>
+</footer>
 
-            const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
+<!-- ALERTA: SIN SESIÓN -->
+<div class="ov" id="m-need"><div class="md" style="text-align:center">
+  <h3>Regístrate o Inicia Sesión para continuar</h3>
+  <p>Crea tu cuenta o ingresa para comprar y ver más detalles de nuestras joyas.</p>
+  <div class="mb" style="justify-content:center"><button class="btn" onclick="closeModal('m-need')">Ahora no</button><button class="btn btn-p" onclick="closeModal('m-need');openAuth('login')">Inicia sesión</button><button class="btn btn-g" onclick="closeModal('m-need');openAuth('reg')">Regístrate</button></div>
+</div></div>
 
-            const targetContent = document.getElementById('tab-' + tabName);
-            if(targetContent) targetContent.style.display = 'block';
+<!-- MODAL CUENTA -->
+<div class="ov" id="m-auth"><div class="md">
+  <div class="seg"><button id="t-login" onclick="authTab('login')">Ingresar</button><button id="t-reg" onclick="authTab('reg')">Crear cuenta</button></div>
+  <h3 id="auth-title"></h3><p id="auth-sub"></p>
+  <div id="reg-only">
+    <div class="photo-pick"><div class="avatar" id="photo-prev">?</div>
+      <div><button class="btn btn-sm" type="button" onclick="document.getElementById('photo-in').click()">Subir foto de perfil</button>
+      <input type="file" id="photo-in" accept="image/*" hidden onchange="pickPhoto(event)"></div></div>
+    <label>Nombre</label><input class="fi" id="a-name" placeholder="Tu nombre">
+  </div>
+  <label>Correo electrónico</label><input class="fi" id="a-mail" type="email" placeholder="correo@ejemplo.com" autocomplete="email" oninput="mailHint()">
+  <label>Contraseña</label><input class="fi" id="a-pass" type="password" placeholder="Mínimo 6 caracteres">
+  <label id="role-label">Rol</label>
+  <div class="roles">
+    <button type="button" class="rc on" id="r-cliente" onclick="setRole('cliente')"><b>Cliente</b>Compra joyas</button>
+    <button type="button" class="rc" id="r-empleado" onclick="setRole('empleado')"><b>Empleado</b>Catálogo e inventarios</button>
+    <button type="button" class="rc" id="r-admin" onclick="setRole('admin')"><b>Administrador</b>Acceso total</button>
+  </div>
+  <div id="code-box" style="display:none"><label id="code-label">Código de acceso</label><input class="fi" id="a-code" type="password" placeholder="Código entregado por la joyería" autocomplete="off"></div>
+  <div class="mb"><button class="btn" onclick="closeModal('m-auth')">Cancelar</button><button class="btn btn-p" id="auth-go" onclick="doAuth()">Continuar</button></div>
+</div></div>
 
-            const targetBtn = document.getElementById('btn-tab-' + tabName);
-            if(targetBtn) targetBtn.classList.add('active');
+<!-- MODAL NUEVO PRODUCTO -->
+<div class="ov" id="m-prod"><div class="md">
+  <h3>Agregar nuevo producto al catálogo</h3><p>Se mostrará como tarjeta en el catálogo y se sumará al sistema de inventarios.</p>
+  <label>Nombre de la joya / producto</label><input class="fi" id="p-name" placeholder="Ej: Anillo Bolivianita Solitario">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+    <div><label>Código SKU</label><input class="fi" id="p-sku" placeholder="AN-99"></div>
+    <div><label>Precio (Bs.)</label><input class="fi" id="p-price" type="number" min="0" step="0.01"></div>
+    <div><label>Stock inicial</label><input class="fi" id="p-stock" type="number" min="0" value="1"></div>
+  </div>
+  <label>Imagen</label>
+  <div class="prev" id="p-prev">Sin imagen</div>
+  <div style="display:flex;gap:8px;margin-bottom:.8rem"><button class="btn btn-sm" type="button" onclick="document.getElementById('p-file').click()">Subir archivo</button><input type="file" id="p-file" accept="image/*" hidden onchange="pickProdImg(event)">
+    <input class="fi" id="p-url" style="margin:0" placeholder="…o pega un enlace de imagen" oninput="urlProdImg()"></div>
+  <div class="mb"><button class="btn" onclick="closeModal('m-prod')">Cancelar</button><button class="btn btn-g" onclick="saveProd()">Guardar producto</button></div>
+</div></div>
 
-            if(tabName === 'graficos') {
-                setTimeout(() => {
-                    initOrUpdateCharts(inventoryData);
-                }, 50);
-            }
-        }
+<!-- MODAL CARRITO -->
+<div class="ov" id="m-cart"><div class="md">
+  <h3>Mi carrito</h3><p id="cart-sub"></p>
+  <div id="cart-body"></div>
+  <div class="mb" style="margin-top:.6rem">
+    <button class="btn btn-d" onclick="sel={};renderCart();updCart()">Vaciar</button>
+    <button class="btn btn-l" id="btn-copy" onclick="copyList()" style="display:none">Copiar código + nombre</button>
+    <button class="btn btn-g" onclick="openCheckout()">Finalizar compra</button>
+  </div>
+</div></div>
 
-        function renderTable() {
-            const tbody = document.getElementById('inventory-tbody');
-            if(!tbody) return;
-            tbody.innerHTML = '';
+<!-- MODAL COMPRA -->
+<div class="ov" id="m-co"><div class="md">
+  <h3>Finalizar compra</h3><p>Tu pedido se enviará por WhatsApp a la joyería para coordinar el pago y la entrega.</p>
+  <div id="co-sum"></div>
+  <label>Teléfono de contacto</label><input class="fi" id="co-phone" type="tel" placeholder="7XXXXXXX">
+  <label>Ciudad y dirección de entrega</label><input class="fi" id="co-addr" placeholder="Cochabamba, Av. …">
+  <label>Forma de pago</label>
+  <select class="fi" id="co-pay"><option>QR</option><option>Tarjeta</option><option>Efectivo contra entrega</option></select>
+  <div class="mb"><button class="btn" onclick="closeModal('m-co')">Volver</button><button class="btn btn-p" onclick="confirmOrder()">Enviar pedido por WhatsApp</button></div>
+</div></div>
 
-            inventoryData.forEach(item => {
-                const totalVal = (item.stock * item.price).toFixed(2);
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="text-align:center;"><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
-                    <td><strong>${item.sku}</strong></td>
-                    <td>${item.name}</td>
-                    <td>${item.location}</td>
-                    <td>${item.stock}</td>
-                    <td>${item.min}</td>
-                    <td>$${parseFloat(item.price).toFixed(2)}</td>
-                    <td>$${totalVal}</td>
-                    <td><button class="btn-action" style="padding:2px 6px; font-size:0.75rem; color:red;" onclick="deleteRow(${item.id})">Eliminar</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+<!-- MODAL AGREGAR JOYA (inventario) -->
+<div class="ov" id="m-add"><div class="md">
+  <h3>Agregar joya al inventario</h3><p>Si el código ya existe, se sumará al stock actual.</p>
+  <label>Código SKU</label><input class="fi" id="n-sku">
+  <label>Nombre de la joya</label><input class="fi" id="n-name">
+  <label>Ubicación</label><input class="fi" id="n-loc" value="Bóveda Principal">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+    <div><label>Stock</label><input class="fi" id="n-stock" type="number" min="0" value="1"></div>
+    <div><label>Mínimo</label><input class="fi" id="n-min" type="number" min="0" value="2"></div>
+    <div><label>Precio Bs.</label><input class="fi" id="n-price" type="number" min="0" step="0.01" value="0"></div>
+  </div>
+  <div class="mb"><button class="btn" onclick="closeModal('m-add')">Cancelar</button><button class="btn btn-p" onclick="addManual()">Guardar</button></div>
+</div></div>
 
-        function toggleSelectAll(master) {
-            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked);
-        }
+<!-- MODAL PEGAR -->
+<div class="ov" id="m-paste"><div class="md">
+  <h3>Pegar lista</h3><p>Tu navegador no permitió leer el portapapeles. Pega aquí con Ctrl+V.</p>
+  <textarea id="paste-man" placeholder="AR-47 ⇥ Aretes Árbol de la Vida ⇥ 2"></textarea>
+  <div class="mb" style="margin-top:1rem"><button class="btn" onclick="closeModal('m-paste')">Cancelar</button><button class="btn btn-p" onclick="importText(document.getElementById('paste-man').value);closeModal('m-paste')">Importar</button></div>
+</div></div>
 
-        function filterTable() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            document.querySelectorAll('#inventory-tbody tr').forEach(tr => {
-                tr.style.display = tr.innerText.toLowerCase().includes(query) ? '' : 'none';
-            });
-        }
+<div id="toast"></div>
 
-        function openModal() { document.getElementById('modal-anote').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal-anote').style.display = 'none'; }
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast('No hay espacio para guardar. Usa imágenes más pequeñas.')}};
+const bs=n=>'Bs. '+Number(n).toLocaleString('es-BO',{minimumFractionDigits:2,maximumFractionDigits:2});
+const ph=t=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6B4E9A"/><stop offset="1" stop-color="#1F1F24"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><path d="M50 28l16 14-16 30-16-30z" fill="none" stroke="#D4AF37" stroke-width="2"/><text x="50" y="86" fill="#D4AF37" font-size="8" text-anchor="middle">${t}</text></svg>`);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
+function openModal(id){$('#'+id).classList.add('show')}
+function closeModal(id){$('#'+id).classList.remove('show')}
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('mousedown',e=>{if(e.target===o)o.classList.remove('show')}));
 
-        function saveSingleNote(e) {
-            e.preventDefault();
-            const newObj = {
-                id: Date.now(),
-                sku: document.getElementById('m-sku').value,
-                name: document.getElementById('m-name').value,
-                location: document.getElementById('m-loc').value,
-                stock: parseInt(document.getElementById('m-stock').value),
-                min: parseInt(document.getElementById('m-min').value),
-                price: parseFloat(document.getElementById('m-price').value)
-            };
-            inventoryData.push(newObj);
-            renderTable();
-            closeModal();
-        }
+/* ===== CONFIGURACIÓN DE ACCESO ===== */
+const WA='59170000000';
+// Códigos guardados como huella SHA-256 (no aparecen en texto plano). Códigos iniciales:
+// Empleado: 3mpl3ado2026   Administrador: admin12345
+// El Administrador puede cambiarlos desde el menú de cuenta ("Cambiar códigos de acceso").
+const CODE_HASH_DEFAULT={empleado:'cd626e23a395f3d5939b820e90cdac9f0463e29b67b14e0b4042ec45b1959a15',admin:'ce1a850a19682e82f96266c7dc27893ffb08fc53f37d60f7a233c712f7a7e29f'};
+let CODE_HASH=load('cb_codes',CODE_HASH_DEFAULT);
+async function sha(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{let h=5381;for(const c of s)h=(h*33)^c.charCodeAt(0);return 'f'+(h>>>0).toString(16)}}
+const checkCode=async(r,c)=>(await sha(c.trim().toUpperCase()))===CODE_HASH[r];
+const RANK={cliente:0,empleado:1,admin:2};
+const LABEL={cliente:'Cliente',empleado:'Empleado',admin:'Administrador'};
 
-        function deleteRow(id) {
-            inventoryData = inventoryData.filter(i => i.id !== id);
-            renderTable();
-        }
+/* ===== DATOS (JSON en localStorage) ===== */
+const CAT0=[
+ {cod:'AR-47',name:'Aretes Árbol de la Vida',cat:'Aretes',stock:1,price:1099,img:'joya1.jpg'},
+ {cod:'AN-12',name:'Anillo Ametrino Imperial',cat:'Anillos',stock:3,price:1450,img:'joya2.jpg'},
+ {cod:'DI-08',name:'Dije Gota de Bolivianita',cat:'Dijes',stock:2,price:890,img:'joya3.jpg'},
+ {cod:'PU-05',name:'Pulsera Filigrana Plata 925',cat:'Pulseras',stock:5,price:650,img:'joya4.jpg'},
+ {cod:'CO-21',name:'Collar Reina de la Selva',cat:'Collares',stock:1,price:2100,img:'joya5.jpg'},
+ {cod:'AR-09',name:'Aretes Flor de Amatista',cat:'Aretes',stock:4,price:780,img:'joya6.jpg'},
+ {cod:'AN-88',name:'Anillo Compromiso Oro Rosa',cat:'Anillos',stock:2,price:3200,img:'joya7.jpg'},
+ {cod:'DI-55',name:'Dije Corazón Bolivianita',cat:'Dijes',stock:6,price:540,img:'joya8.jpg'}
+];
+const SEED=[
+ {sku:'JOY-BOL-001',name:'Anillo Bolivianita Oro 18k',loc:'Bóveda Principal',stock:8,min:2,price:450},
+ {sku:'JOY-BOL-002',name:'Dije Ametrino Tallado Extra',loc:'Vitrina Exhibición A',stock:12,min:2,price:280},
+ {sku:'JOY-SIL-003',name:'Pulsera Plata 925 Tejida',loc:'Taller de Joyería',stock:15,min:2,price:95},
+ {sku:'JOY-ORO-004',name:'Aretes Filigrana Oro Rosa',loc:'Bóveda Principal',stock:6,min:2,price:320},
+ {sku:'JOY-BOL-005',name:'Collar Plata con Bolivianita Oval',loc:'Vitrina Exhibición A',stock:10,min:2,price:210}
+];
+let CAT=load('cb_cat',CAT0), inv=load('cb_inv2',SEED), sel=load('cb_sel',{}), orders=load('cb_orders',[]);
+let accounts=load('cb_acc3',[]), cur=load('cb_cur3',-1), curRole=load('cb_role',null), filt='Todas', src='all', pendingPhoto='', authMode='login', roleSel='cliente', curTab='inicio', prodImg='';
+const persist=()=>save('cb_inv2',inv), persistCat=()=>save('cb_cat',CAT);
+if(!accounts[cur])cur=-1;
 
-        function importExcelFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+/* ===== ROLES ===== */
+const me=()=>accounts[cur]||null;
+const role=()=>me()?(curRole&&RANK[curRole]<=RANK[me().role]?curRole:'cliente'):'guest';
+const isAdmin=()=>role()==='admin';
+const isStaff=()=>role()==='empleado'||role()==='admin';
+const TAB_NEED={inventarios:()=>isStaff(),tienda:()=>isAdmin(),graficos:()=>isAdmin()};
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+/* ===== CUENTA ===== */
+const initials=n=>(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const avatarHTML=a=>`<div class="avatar">${a.photo?`<img src="${a.photo}" alt="">`:esc(initials(a.name))}</div>`;
+function renderAuth(){
+  const z=$('#auth-zone'),a=me();
+  if(!a){z.innerHTML=`<div style="display:flex;gap:12px;align-items:center"><button class="btn-link" onclick="openAuth('login')">Inicia sesión</button><button class="btn-outline" onclick="openAuth('reg')">Regístrate</button></div>`;return}
+  const r=role(),cls=r==='admin'?'adm':r==='empleado'?'emp':'';
+  const sw=a.role!=='cliente'?`<div class="rsw-box">VER COMO<div class="rsw">${['cliente','empleado','admin'].filter(k=>RANK[k]<=RANK[a.role]).map(k=>`<button class="${k===r?'on':''}" onclick="switchRole('${k}')">${LABEL[k]}</button>`).join('')}</div></div>`:'';
+  z.innerHTML=`<div class="account" id="acc"><button class="acc-btn" onclick="$('#acc').classList.toggle('open')" aria-label="Cuenta">${avatarHTML(a)}<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></button>
+  <div class="menu"><div class="menu-head">${avatarHTML(a)}<div><b>${esc(a.name)}</b><small>${esc(a.email)}</small><span class="role ${cls}">${LABEL[r]}</span></div></div>${sw}
+  <button onclick="openAuth('login')">➕ Agregar cuenta</button><button class="out" onclick="logout()">⏻ Cerrar sesión</button></div></div>`;
+}
+document.addEventListener('click',e=>{const a=$('#acc');if(a&&!a.contains(e.target))a.classList.remove('open')});
+function switchRole(r){
+  const a=me();if(!a||RANK[r]>RANK[a.role])return;
+  curRole=r;save('cb_role',curRole);renderAll();
+  goTab(TAB_NEED[curTab]&&!TAB_NEED[curTab]()?'inicio':curTab);
+  toast('Ahora ves la tienda como '+LABEL[r]);
+}
+function openAuth(mode){
+  const acc=$('#acc');if(acc)acc.classList.remove('open');
+  pendingPhoto='';['a-name','a-mail','a-pass','a-code'].forEach(i=>$('#'+i).value='');$('#photo-prev').innerHTML='?';
+  setRole('cliente');authTab(mode);openModal('m-auth');
+}
+function authTab(t){
+  authMode=t;
+  $('#t-login').classList.toggle('on',t==='login');$('#t-reg').classList.toggle('on',t==='reg');
+  $('#reg-only').style.display=t==='reg'?'block':'none';
+  $('#auth-title').textContent=t==='login'?'Bienvenido de nuevo':'Crea tu cuenta';
+  $('#auth-sub').textContent=t==='login'?'Ingresa con tu correo y elige con qué rol quieres entrar.':'Completa tus datos y elige tu rol.';
+  $('#role-label').textContent=t==='login'?'Entrar como':'Tipo de cuenta';
+  $('#auth-go').textContent=t==='login'?'Ingresar':'Crear cuenta';
+  setRole(roleSel);
+}
+function setRole(r){
+  roleSel=r;['cliente','empleado','admin'].forEach(k=>$('#r-'+k).classList.toggle('on',k===r));
+  $('#code-box').style.display=r==='cliente'?'none':'block';
+  $('#code-label').textContent=r==='admin'?'Código de administrador':'Código de empleado';
+}
+function mailHint(){
+  if(authMode!=='login')return;
+  const a=accounts.find(x=>x.email===$('#a-mail').value.trim().toLowerCase());
+  if(a)setRole(a.role);
+}
+function pickPhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=160;const x=c.getContext('2d'),s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);pendingPhoto=c.toDataURL('image/jpeg',.8);$('#photo-prev').innerHTML=`<img src="${pendingPhoto}">`};im.src=r.result};r.readAsDataURL(f);
+}
+async function doAuth(){
+  const email=$('#a-mail').value.trim().toLowerCase(),pass=$('#a-pass').value,code=$('#a-code').value,r=roleSel;
+  if(!/\S+@\S+\.\S+/.test(email)){toast('Escribe un correo válido');return}
+  if(pass.length<6){toast('La contraseña debe tener al menos 6 caracteres');return}
+  const hash=await sha(email+'|'+pass);
+  if(authMode==='login'){
+    const i=accounts.findIndex(a=>a.email===email);
+    if(i<0||accounts[i].pass!==hash){toast('Correo o contraseña incorrectos');return}
+    if(RANK[r]>RANK[accounts[i].role]){toast('Tu cuenta no tiene permiso para entrar como '+LABEL[r]);return}
+    if(r!=='cliente'&&!(await checkCode(r,code))){toast(code?'Código incorrecto':'Ingresa el código de acceso');return}
+    cur=i;
+  }else{
+    const name=$('#a-name').value.trim();
+    if(!name){toast('Escribe tu nombre');return}
+    if(accounts.some(a=>a.email===email)){toast('Ese correo ya tiene cuenta. Usa “Ingresar”');return}
+    if(r!=='cliente'&&!(await checkCode(r,code))){toast('Código incorrecto. No se puede crear una cuenta de '+LABEL[r]);return}
+    accounts.push({name,email,pass:hash,role:r,photo:pendingPhoto});cur=accounts.length-1;save('cb_acc3',accounts);
+  }
+  curRole=r;save('cb_cur3',cur);save('cb_role',curRole);
+  closeModal('m-auth');renderAll();goTab('inicio');toast(`Hola, ${me().name} (${LABEL[r]})`);
+}
+function logout(){cur=-1;curRole=null;save('cb_cur3',cur);save('cb_role',curRole);renderAll();goTab('inicio');toast('Sesión cerrada')}
+function needLogin(){openModal('m-need')}
 
-                if (jsonData.length <= 1) {
-                    alert('El archivo no contiene filas de datos.');
-                    return;
-                }
+/* ===== NAVEGACIÓN ===== */
+function renderNav(){
+  const t=[['inicio','Catálogo']];
+  if(isStaff())t.push(['inventarios','Sistema de Inventarios']);
+  if(isAdmin())t.push(['graficos','Esquemas y Gráficos'],['tienda','Gestión de Tienda']);
+  $('#nav').innerHTML=t.map(([k,l])=>`<button class="tab-btn ${k===curTab?'active':''}" onclick="goTab('${k}')">${l}</button>`).join('');
+}
+function goTab(t){
+  if(TAB_NEED[t]&&!TAB_NEED[t]()){if(!me())needLogin();else toast('No tienes permiso para esta sección');t='inicio'}
+  curTab=t;
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id==='tab-'+t));
+  renderNav();if(t==='graficos')renderCharts();window.scrollTo({top:0});
+}
+function renderAll(){
+  renderAuth();renderNav();renderChips();renderCatalog();updCart();renderInv();renderStore();renderOrders();
+  $('#cart-btn').style.display=me()?'block':'none';
+}
 
-                const importedItems = [];
-                for (let i = 1; i < jsonData.length; i++) {
-                    const row = jsonData[i];
-                    if (row.length > 0) {
-                        importedItems.push({
-                            id: Date.now() + i,
-                            sku: row[0] || `SKU-${i}`,
-                            name: row[1] || `Producto ${i}`,
-                            location: row[2] || 'Bóveda Principal',
-                            stock: parseInt(row[3]) || 1,
-                            min: parseInt(row[4]) || 1,
-                            price: parseFloat(row[5]) || 0.00
-                        });
-                    }
-                }
+/* ===== CATÁLOGO ===== */
+const qtyState={};
+function renderChips(){
+  const cats=['Todas',...new Set(CAT.map(c=>c.cat))];
+  $('#chips').innerHTML=cats.map(c=>`<button class="chip ${c===filt?'on':''}" onclick="filt='${esc(c)}';renderChips();renderCatalog()">${esc(c)}</button>`).join('');
+}
+function renderCatalog(){
+  const logged=!!me(),staff=isStaff();
+  $('#admin-bar').innerHTML=isAdmin()?`<button class="btn btn-g" onclick="openProd()">+ Agregar Nuevo Producto al Catálogo</button>`:'';
+  $('#catalog').innerHTML=CAT.filter(p=>filt==='Todas'||p.cat===filt).map(p=>{
+    let ctl='';
+    if(logged){
+      const q=qtyState[p.cod]||1;
+      ctl=p.stock<=0?`<button class="btn" disabled>Agotado</button>`:
+      `<div class="qty"><button class="qb" onclick="chg('${p.cod}',-1)">−</button><input type="number" min="1" max="${p.stock}" value="${q}" onchange="setQ('${p.cod}',this.value)"><button class="qb" onclick="chg('${p.cod}',1)">+</button></div>
+       <button class="btn btn-p" onclick="addSel('${p.cod}')">Agregar al carrito</button>`;
+    }
+    return `<div class="card ${logged?'':'gate'}" ${logged?'':'onclick="needLogin()"'}><div class="im"><img src="${p.img||ph(p.cod)}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src=ph('${esc(p.cod)}')"><div class="cod">COD: ${esc(p.cod)}</div>${staff?`<div class="stkb">Stock ${p.stock}</div>`:''}</div>
+    <div class="cb"><div class="ct">${esc(p.name)}</div><div class="price">${bs(p.price)}</div>${ctl}</div></div>`}).join('');
+}
+function setQ(cod,v){const p=CAT.find(c=>c.cod===cod);let n=Math.max(1,parseInt(v)||1);if(n>p.stock){n=p.stock;toast('Solo hay '+p.stock+' disponible(s)')}qtyState[cod]=n;renderCatalog()}
+function chg(cod,d){setQ(cod,(qtyState[cod]||1)+d)}
+function addSel(cod){
+  if(!me()){needLogin();return}
+  const p=CAT.find(c=>c.cod===cod),q=qtyState[cod]||1;
+  sel[cod]=Math.min(p.stock,(sel[cod]||0)+q);updCart();toast(`${q} × ${p.name} en tu carrito`);
+}
+const updCart=()=>{$('#cart-n').textContent=Object.values(sel).reduce((a,b)=>a+b,0);save('cb_sel',sel)};
 
-                inventoryData = importedItems;
-                renderTable();
-                alert(`¡Se importaron ${importedItems.length} productos desde tu archivo Excel!`);
-                event.target.value = '';
-            };
-            reader.readAsArrayBuffer(file);
-        }
+/* stock sincronizado entre catálogo e inventario (mismo código SKU) */
+function setStock(sku,n){
+  n=Math.max(0,n);const c=CAT.find(x=>x.cod===sku);if(c)c.stock=n;
+  const i=inv.find(x=>x.sku===sku);if(i)i.stock=n;persistCat();persist();
+}
+const stockOf=sku=>{const c=CAT.find(x=>x.cod===sku);return c?c.stock:(find(sku)||{stock:0}).stock};
 
-        function copySelectedRows() {
-            const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
-            if(selectedBoxes.length === 0) {
-                alert('Por favor selecciona al menos un registro de inventario.');
-                return;
-            }
+/* ===== NUEVO PRODUCTO (administrador) ===== */
+function guessCat(n){n=n.toLowerCase();for(const [k,v] of [['anillo','Anillos'],['arete','Aretes'],['dije','Dijes'],['pulsera','Pulseras'],['collar','Collares']])if(n.includes(k))return v;return 'Otros'}
+function resizeImg(file,max,cb){
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.82))};im.src=r.result};r.readAsDataURL(file);
+}
+function openProd(){
+  if(!isAdmin())return;prodImg='';
+  ['p-name','p-sku','p-price','p-url'].forEach(i=>$('#'+i).value='');$('#p-stock').value=1;$('#p-file').value='';
+  $('#p-prev').innerHTML='Sin imagen';openModal('m-prod');
+}
+function pickProdImg(e){const f=e.target.files[0];if(!f)return;$('#p-url').value='';resizeImg(f,700,d=>{prodImg=d;$('#p-prev').innerHTML=`<img src="${d}">`})}
+function urlProdImg(){const u=$('#p-url').value.trim();if(u){prodImg=u;$('#p-prev').innerHTML=`<img src="${esc(u)}" onerror="this.parentNode.textContent='No se pudo cargar el enlace'">`}}
+function saveProd(){
+  if(!isAdmin())return;
+  const name=$('#p-name').value.trim(),sku=$('#p-sku').value.trim().toUpperCase(),price=parseFloat($('#p-price').value),stock=parseInt($('#p-stock').value);
+  if(!name||!sku){toast('El nombre y el código SKU son obligatorios');return}
+  if(!(price>=0)||isNaN(price)){toast('Escribe un precio válido en Bs.');return}
+  if(isNaN(stock)||stock<0){toast('Escribe un stock inicial válido');return}
+  if(CAT.some(c=>c.cod===sku)){toast('Ya existe un producto con ese código SKU');return}
+  CAT.unshift({cod:sku,name,cat:guessCat(name),stock,price,img:prodImg});persistCat();
+  const e=find(sku);if(e){e.stock+=stock;e.price=price}else inv.push({sku,name,loc:'Vitrina Exhibición A',stock,min:2,price});
+  persist();closeModal('m-prod');renderChips();renderCatalog();renderInv();renderStore();toast('Producto agregado al catálogo e inventario');
+}
 
-            let textToCopy = "";
-            selectedBoxes.forEach(cb => {
-                const item = inventoryData.find(i => i.id == cb.value);
-                if(item) {
-                    textToCopy += `${item.sku}\t${item.name}\t${item.location}\t${item.stock}\t${item.price}\n`;
-                }
-            });
+/* ===== GESTIÓN DE TIENDA (administrador) ===== */
+function renderStore(){
+  $('#store-body').innerHTML=CAT.map(p=>`<tr><td><img class="th" src="${p.img||ph(p.cod)}" alt="" onerror="this.onerror=null;this.src=ph('${esc(p.cod)}')"></td><td><b>${esc(p.cod)}</b></td>
+  <td><input class="nm" type="text" value="${esc(p.name)}" onchange="setName('${esc(p.cod)}',this.value)"></td>
+  <td><input class="mini" type="number" min="0" step="0.01" value="${p.price}" onchange="setPrice('${esc(p.cod)}',this.value)"></td>
+  <td><div class="stk"><button class="qb" onclick="storeStock('${esc(p.cod)}',-1)">−</button><b>${p.stock}</b><button class="qb" onclick="storeStock('${esc(p.cod)}',1)">+</button></div></td>
+  <td><div class="acts"><label class="btn btn-sm" style="cursor:pointer">Cambiar imagen<input type="file" accept="image/*" hidden onchange="setImg('${esc(p.cod)}',event)"></label><button class="btn btn-sm btn-d" onclick="delProd('${esc(p.cod)}')">Quitar del catálogo</button></div></td></tr>`).join('');
+}
+function setName(cod,v){
+  if(!isAdmin())return;v=v.trim();if(!v){toast('El nombre no puede estar vacío');renderStore();return}
+  const c=CAT.find(x=>x.cod===cod);c.name=v;c.cat=guessCat(v);const i=find(cod);if(i)i.name=v;
+  persistCat();persist();renderChips();renderCatalog();renderInv();toast('Nombre actualizado');
+}
+function setImg(cod,e){
+  if(!isAdmin())return;const f=e.target.files[0];if(!f)return;
+  resizeImg(f,700,d=>{CAT.find(c=>c.cod===cod).img=d;persistCat();renderCatalog();renderStore();toast('Imagen actualizada')});
+}
+function setPrice(cod,v){if(!isAdmin())return;const n=parseFloat(v)||0;CAT.find(c=>c.cod===cod).price=n;const i=find(cod);if(i)i.price=n;persistCat();persist();renderCatalog();renderInv();toast('Precio actualizado')}
+function storeStock(cod,d){if(!isAdmin())return;setStock(cod,stockOf(cod)+d);renderStore();renderCatalog();renderInv()}
+function delProd(cod){
+  if(!isAdmin()||!confirm('¿Quitar este producto del catálogo? (seguirá en el inventario)'))return;
+  CAT=CAT.filter(c=>c.cod!==cod);delete sel[cod];persistCat();updCart();renderChips();renderCatalog();renderStore();
+}
 
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert(`Se copiaron ${selectedBoxes.length} registros al portapapeles.`);
-            });
-        }
+/* ===== CARRITO Y COMPRA ===== */
+function openCart(){if(!me())return;renderCart();openModal('m-cart')}
+function cartTotal(){return Object.keys(sel).reduce((a,k)=>{const p=CAT.find(c=>c.cod===k);return a+(p?p.price*sel[k]:0)},0)}
+function renderCart(){
+  $('#btn-copy').style.display=isStaff()?'inline-block':'none';
+  $('#cart-sub').textContent=isStaff()?'Compra las joyas o copia código + nombre para pegarlos en el inventario.':'Revisa tus joyas antes de finalizar la compra.';
+  const ks=Object.keys(sel).filter(k=>CAT.find(c=>c.cod===k));
+  $('#cart-body').innerHTML=ks.length?ks.map(k=>{const p=CAT.find(c=>c.cod===k);return `<div class="li"><div><b>${esc(k)}</b> ${esc(p.name)}<br><small>${bs(p.price)} c/u</small></div><div class="stk"><button class="qb" onclick="selChg('${esc(k)}',-1)">−</button><b>${sel[k]}</b><button class="qb" onclick="selChg('${esc(k)}',1)">+</button></div><button class="btn btn-sm btn-d" onclick="delete sel['${esc(k)}'];renderCart();updCart()">✕</button></div>`}).join('')+`<div class="total"><span>Total</span><span>${bs(cartTotal())}</span></div>`:'<div class="empty">Tu carrito está vacío. Elige cantidades en el catálogo.</div>';
+}
+function selChg(k,d){const p=CAT.find(c=>c.cod===k);sel[k]=Math.max(0,Math.min(p.stock,sel[k]+d));if(!sel[k])delete sel[k];renderCart();updCart()}
+function copyText(t,msg){
+  const done=()=>toast(msg);
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(done).catch(fb);else fb();
+  function fb(){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();done()}
+}
+function copyList(){
+  if(!isStaff())return;const ks=Object.keys(sel);if(!ks.length){toast('Tu carrito está vacío');return}
+  copyText(ks.map(k=>`${k}\t${CAT.find(c=>c.cod===k).name}\t${sel[k]}`).join('\n'),'Copiado. Ve a Inventarios y pulsa “Pegar lista”');
+}
+function openCheckout(){
+  const ks=Object.keys(sel);if(!ks.length){toast('Tu carrito está vacío');return}
+  $('#co-sum').innerHTML=ks.map(k=>{const p=CAT.find(c=>c.cod===k);return `<div style="display:flex;justify-content:space-between;font-size:.85rem;padding:3px 0"><span>${sel[k]} × ${esc(p.name)}</span><b>${bs(p.price*sel[k])}</b></div>`}).join('')+`<div class="total"><span>Total</span><span>${bs(cartTotal())}</span></div>`;
+  closeModal('m-cart');openModal('m-co');
+}
+function confirmOrder(){
+  const phone=$('#co-phone').value.trim(),addr=$('#co-addr').value.trim(),pay=$('#co-pay').value;
+  if(phone.length<7||!addr){toast('Completa tu teléfono y dirección de entrega');return}
+  const items=Object.keys(sel).map(k=>{const p=CAT.find(c=>c.cod===k);return {cod:k,name:p.name,q:sel[k],price:p.price}});
+  const total=cartTotal(),u=me();
+  items.forEach(i=>setStock(i.cod,stockOf(i.cod)-i.q));
+  orders.unshift({id:Date.now(),date:new Date().toLocaleString('es-BO'),name:u.name,email:u.email,phone,addr,pay,items,total,status:'Pendiente'});
+  save('cb_orders',orders);
+  const msg=`Hola, soy ${u.name}. Quiero comprar:\n`+items.map(i=>`• ${i.q} × ${i.name} (${i.cod})`).join('\n')+`\nTotal: ${bs(total)}\nPago: ${pay}\nTeléfono: ${phone}\nEntrega: ${addr}`;
+  sel={};updCart();closeModal('m-co');renderCatalog();renderOrders();renderStore();renderInv();
+  window.open(`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`,'_blank');
+  toast('Pedido registrado. Confirma el envío en WhatsApp');
+}
 
-        function exportToExcel() {
-            if (typeof XLSX === 'undefined') return;
-            const ws = XLSX.utils.json_to_sheet(inventoryData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Inventario CB");
-            XLSX.writeFile(wb, "Inventario_Bolivianita.xlsx");
-        }
+/* ===== PEDIDOS (administrador) ===== */
+function renderOrders(){
+  $('#orders-empty').style.display=orders.length?'none':'block';
+  $('#orders-body').innerHTML=orders.map(o=>`<tr><td>${o.date}</td><td><b>${esc(o.name)}</b><br><small>${esc(o.email)}</small></td><td>${esc(o.phone)}<br><small>${esc(o.addr)}</small></td><td>${esc(o.pay)}</td>
+  <td>${o.items.map(i=>`${i.q}× ${esc(i.name)}`).join('<br>')}</td><td><b>${bs(o.total)}</b></td>
+  <td><select onchange="setOrderStatus(${o.id},this.value)">${['Pendiente','Entregado','Cancelado'].map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select></td>
+  <td><button class="btn btn-sm btn-d" onclick="delOrder(${o.id})">Eliminar</button></td></tr>`).join('');
+}
+function setOrderStatus(id,s){
+  if(!isAdmin())return;const o=orders.find(x=>x.id===id);
+  if(s==='Cancelado'&&o.status!=='Cancelado')o.items.forEach(i=>setStock(i.cod,stockOf(i.cod)+i.q));
+  if(o.status==='Cancelado'&&s!=='Cancelado')o.items.forEach(i=>setStock(i.cod,stockOf(i.cod)-i.q));
+  o.status=s;save('cb_orders',orders);renderCatalog();renderStore();renderInv();
+}
+function delOrder(id){if(!isAdmin())return;orders=orders.filter(o=>o.id!==id);save('cb_orders',orders);renderOrders()}
 
-        function initOrUpdateCharts(dataArray) {
-            if(!dataArray || dataArray.length === 0) return;
+/* ===== INVENTARIO ===== */
+const status=i=>i.stock<=0?['Agotado','out']:i.stock<=i.min?['Bajo','low']:['OK',''];
+function renderInv(){
+  const q=($('#search').value||'').toLowerCase();
+  const checked=new Set([...document.querySelectorAll('.rcb:checked')].map(c=>c.value));
+  const rows=inv.filter(i=>(i.sku+i.name+i.loc).toLowerCase().includes(q));
+  $('#tbody').innerHTML=rows.map(i=>{const s=status(i);return `<tr>
+   <td><input type="checkbox" class="rcb" value="${esc(i.sku)}" ${checked.has(i.sku)?'checked':''}></td>
+   <td><b>${esc(i.sku)}</b></td><td>${esc(i.name)}</td><td>${esc(i.loc)}</td>
+   <td><div class="stk"><button class="qb" onclick="stk('${esc(i.sku)}',-1)">−</button><b>${i.stock}</b><button class="qb" onclick="stk('${esc(i.sku)}',1)">+</button></div></td>
+   <td><input class="mini" style="width:52px" type="number" min="0" value="${i.min}" onchange="setMin('${esc(i.sku)}',this.value)"></td>
+   <td>${bs(i.price)}</td><td><b>${bs(i.stock*i.price)}</b></td>
+   <td><span class="badge ${s[1]}">${s[0]}</span></td>
+   <td><button class="btn btn-sm btn-d" onclick="del('${esc(i.sku)}')">Eliminar</button></td></tr>`}).join('');
+  $('#inv-empty').style.display=inv.length?'none':'block';
+  $('#i-prod').textContent=inv.length;
+  $('#i-units').textContent=inv.reduce((a,i)=>a+i.stock,0);
+  $('#i-val').textContent=bs(inv.reduce((a,i)=>a+i.stock*i.price,0));
+  $('#i-low').textContent=inv.filter(i=>i.stock<=i.min).length;
+}
+const find=s=>inv.find(i=>i.sku===s);
+function stk(s,d){if(!isStaff())return;setStock(s,find(s).stock+d);renderInv();renderCatalog();renderStore()}
+function setMin(s,v){if(!isStaff())return;find(s).min=Math.max(0,parseInt(v)||0);persist();renderInv()}
+function del(s){if(!isStaff())return;inv=inv.filter(i=>i.sku!==s);persist();renderInv()}
+function selectedSkus(){return [...document.querySelectorAll('.rcb:checked')].map(c=>c.value)}
+function toggleAll(m){document.querySelectorAll('.rcb').forEach(c=>c.checked=m.checked)}
+function delSelected(){if(!isStaff())return;const s=selectedSkus();if(!s.length){toast('Selecciona filas primero');return}inv=inv.filter(i=>!s.includes(i.sku));persist();renderInv();toast(s.length+' eliminado(s)')}
+function copyRows(){const s=selectedSkus();if(!s.length){toast('Selecciona filas primero');return}copyText(inv.filter(i=>s.includes(i.sku)).map(i=>`${i.sku}\t${i.name}\t${i.stock}`).join('\n'),s.length+' fila(s) copiadas')}
+function addManual(){
+  if(!isStaff())return;
+  const sku=$('#n-sku').value.trim(),name=$('#n-name').value.trim();
+  if(!sku||!name){toast('Código y nombre son obligatorios');return}
+  merge({sku,name,loc:$('#n-loc').value.trim()||'Bóveda Principal',stock:parseInt($('#n-stock').value)||0,min:parseInt($('#n-min').value)||0,price:parseFloat($('#n-price').value)||0});
+  closeModal('m-add');['n-sku','n-name'].forEach(i=>$('#'+i).value='');persist();renderInv();toast('Joya guardada');
+}
+function merge(o){const e=find(o.sku);if(e){e.stock+=o.stock;if(o.price)e.price=o.price}else inv.push(o)}
 
-            const labels = dataArray.map(i => i.name || i.sku);
-            const stocks = dataArray.map(i => i.stock);
-            const values = dataArray.map(i => i.stock * i.price);
+/* ===== PEGAR / PARSEAR ===== */
+function parseText(t){
+  const out=[];
+  t.split(/\r?\n/).forEach(l=>{
+    l=l.trim();if(!l)return;
+    let c=l.split(/\t|;/).map(x=>x.trim());
+    if(c.length<2){const m=l.match(/^(\S+)\s+(.+?)(?:\s+[x×]?(\d+))?$/i);if(!m)return;c=[m[1],m[2],m[3]||'1']}
+    if(/^(sku|c[oó]digo|cod)$/i.test(c[0]))return;
+    out.push({sku:c[0],name:c[1],stock:Math.max(0,parseInt(c[2])||1),price:parseFloat(c[3])||0});
+  });
+  return out;
+}
+function importText(t){
+  if(!isStaff())return;const rows=parseText(t);
+  if(!rows.length){toast('No encontré datos válidos. Usa: código, nombre, cantidad');return}
+  rows.forEach(r=>{const cp=CAT.find(c=>c.cod===r.sku);merge({sku:r.sku,name:r.name,loc:'Bóveda Principal',stock:r.stock,min:2,price:r.price||(cp?cp.price:0)})});
+  persist();renderInv();toast(rows.length+' joya(s) agregadas al inventario');
+}
+function pasteFromClipboard(){
+  if(navigator.clipboard&&navigator.clipboard.readText&&window.isSecureContext)
+    navigator.clipboard.readText().then(t=>t.trim()?importText(t):toast('El portapapeles está vacío')).catch(()=>{$('#paste-man').value='';openModal('m-paste')});
+  else{$('#paste-man').value='';openModal('m-paste')}
+}
 
-            if(barChartInstance) barChartInstance.destroy();
-            if(doughnutChartInstance) doughnutChartInstance.destroy();
+/* ===== EXCEL ===== */
+function importXL(e){
+  if(!isStaff())return;const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=ev=>{
+    const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1}).slice(1).filter(r=>r[0]);
+    rows.forEach(r=>merge({sku:String(r[0]),name:String(r[1]||r[0]),loc:r[2]||'Bóveda Principal',stock:parseInt(r[3])||0,min:parseInt(r[4])||2,price:parseFloat(r[5])||0}));
+    persist();renderInv();toast(rows.length+' fila(s) importadas');e.target.value='';
+  };r.readAsArrayBuffer(f);
+}
+function exportXL(){
+  if(!inv.length){toast('No hay datos para exportar');return}
+  const ws=XLSX.utils.json_to_sheet(inv.map(i=>({SKU:i.sku,Producto:i.name,Ubicación:i.loc,Stock:i.stock,Mínimo:i.min,'Precio (Bs.)':i.price,'Valor total':i.stock*i.price})));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Inventario');XLSX.writeFile(wb,'Inventario_Bolivianita.xlsx');
+}
 
-            const ctx1 = document.getElementById('barChart').getContext('2d');
-            barChartInstance = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Unidades en Stock',
-                        data: stocks,
-                        backgroundColor: '#C0A3E5'
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+/* ===== GRÁFICOS (administrador) ===== */
+let charts={};
+function setSrc(s){src=s;['all','sel','paste'].forEach(k=>$('#s-'+k).classList.toggle('on',k===s));$('#paste-box').style.display=s==='paste'?'block':'none';renderCharts()}
+const PAL=['#D4AF37','#C0A3E5','#6B4E9A','#1F1F24','#8E3AB0','#A8861F','#E9D8A6','#9d7bd0'];
+function renderCharts(){
+  if(!isAdmin())return;
+  let data=[];const al=$('#g-alert');al.style.display='none';
+  if(src==='all')data=inv;
+  else if(src==='sel'){const s=selectedSkus();data=inv.filter(i=>s.includes(i.sku));if(!data.length)return fail('Selecciona filas en Inventarios (casillas) y vuelve aquí.')}
+  else{data=parseText($('#paste-in').value).map(r=>{const e=find(r.sku)||{};return {sku:r.sku,name:r.name,stock:r.stock,min:e.min??2,price:r.price||e.price||(CAT.find(c=>c.cod===r.sku)||{}).price||0,loc:e.loc||'Sin ubicación'}});if(!data.length)return fail('Pega datos con el formato: código, nombre, cantidad, precio (opcional).')}
+  if(!data.length)return fail('No hay datos. Agrega joyas en el Sistema de Inventarios.');
+  $('#g-body').style.display='block';
+  const val=data.map(i=>i.stock*i.price),tot=val.reduce((a,b)=>a+b,0),top=data[val.indexOf(Math.max(...val))];
+  $('#g-val').textContent=bs(tot);$('#g-units').textContent=data.reduce((a,i)=>a+i.stock,0);
+  $('#g-top').textContent=top?top.name:'—';$('#g-low').textContent=data.filter(i=>i.stock<=i.min).length;
+  const lab=data.map(i=>i.name.length>22?i.name.slice(0,21)+'…':i.name);
+  const locs={};data.forEach(i=>locs[i.loc]=(locs[i.loc]||0)+i.stock*i.price);
+  Object.values(charts).forEach(c=>c.destroy());
+  charts.a=new Chart($('#c1'),{type:'bar',data:{labels:lab,datasets:[{label:'Stock',data:data.map(i=>i.stock),backgroundColor:'#C0A3E5',borderRadius:6},{label:'Mínimo',data:data.map(i=>i.min),backgroundColor:'#D4AF37',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false}});
+  charts.b=new Chart($('#c2'),{type:'doughnut',data:{labels:lab,datasets:[{data:val,backgroundColor:PAL,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}}}}});
+  charts.c=new Chart($('#c3'),{type:'bar',data:{labels:Object.keys(locs),datasets:[{label:'Valor (Bs.)',data:Object.values(locs),backgroundColor:'#6B4E9A',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  function fail(m){al.textContent=m;al.style.display='block';$('#g-body').style.display='none'}
+}
 
-            const ctx2 = document.getElementById('doughnutChart').getContext('2d');
-            doughnutChartInstance = new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: ['#D4AF37', '#C0A3E5', '#1F1F24', '#6B4E9A', '#B59328']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const totalVal = values.reduce((a,b) => a+b, 0);
-            const totalUnits = stocks.reduce((a,b) => a+b, 0);
-            const uniqueLocs = [...new Set(dataArray.map(i => i.location))].length;
-
-            document.getElementById('kpi-total-val').innerText = `$${totalVal.toFixed(2)}`;
-            document.getElementById('kpi-total-items').innerText = `${dataArray.length} Productos registrados`;
-            document.getElementById('kpi-units').innerText = `${totalUnits} pzs`;
-            document.getElementById('kpi-locs').innerText = uniqueLocs;
-        }
-
-        function loadFromCurrentInventory() {
-            const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
-            if(selectedBoxes.length > 0) {
-                const selectedData = [];
-                selectedBoxes.forEach(cb => {
-                    const item = inventoryData.find(i => i.id == cb.value);
-                    if(item) selectedData.push(item);
-                });
-                initOrUpdateCharts(selectedData);
-                alert(`Gráfica generada con los ${selectedData.length} registros seleccionados.`);
-            } else {
-                initOrUpdateCharts(inventoryData);
-                alert('Mostrando gráficas de todo el inventario.');
-            }
-        }
-
-        function pasteAndGenerateChart() {
-            const text = document.getElementById('paste-input').value.trim();
-            if(!text) {
-                alert('Pega primero el texto dentro del cuadro de texto.');
-                return;
-            }
-
-            const lines = text.split('\n');
-            const parsedData = [];
-            lines.forEach((line, idx) => {
-                const cols = line.split('\t');
-                if(cols.length >= 2) {
-                    parsedData.push({
-                        sku: cols[0] || `SKU-${idx}`,
-                        name: cols[1] || `Producto ${idx}`,
-                        location: cols[2] || 'Bóveda',
-                        stock: parseInt(cols[3]) || 5,
-                        price: parseFloat(cols[4]) || 100
-                    });
-                }
-            });
-
-            if(parsedData.length > 0) {
-                initOrUpdateCharts(parsedData);
-                alert(`Se importaron y graficaron ${parsedData.length} registros.`);
-            } else {
-                alert('No se detectó un formato tabular válido.');
-            }
-        }
-    </script>
+/* ===== INICIO ===== */
+(function(){
+  const imgs=Array.from({length:10},(_,i)=>`nuevo${i+1}.jpg`);
+  $('#track').innerHTML=[...imgs,...imgs].map((s,i)=>`<div class="mq"><img src="${s}" alt="Novedad" onerror="this.onerror=null;this.src=ph('Novedad ${i%10+1}')"></div>`).join('');
+})();
+renderAll();
+</script>
 </body>
 </html>
