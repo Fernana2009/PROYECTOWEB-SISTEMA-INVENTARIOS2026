@@ -109,7 +109,8 @@ td input.nm{width:100%;min-width:190px;border:1px solid #ddd;border-radius:6px;p
 td img.th{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--bd)}
 .acts{display:flex;gap:6px;flex-wrap:wrap}
 .stk{display:flex;align-items:center;gap:6px}.stk .qb{width:26px;height:26px;font-size:.9rem}
-.badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700;color:#fff;background:var(--ok)}.badge.low{background:var(--warn)}.badge.out{background:var(--bad)}
+.badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700;color:#fff;background:var(--ok)}.badge.low{background:var(--warn)}.badge.out{background:var(--bad)}.badge.off{background:#9CA3AF}
+tr.disabled-row td{opacity:.55}
 .empty{padding:2.5rem 1rem;text-align:center;color:var(--mu)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:1.2rem}
 .kpi{background:#fff;border:1px solid var(--bd);border-left:4px solid var(--gold);border-radius:10px;padding:1rem 1.2rem}
@@ -153,7 +154,7 @@ footer{background:var(--ink);color:#fff;padding:2.5rem 2rem 1rem;border-top:2px 
 <body>
 
 <header>
-  <div class="brand-box">
+  <div class="brand-box" onclick="secretClick()" title="Creaciones Bolivianita Joyería">
     <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
     <div class="brand">Creaciones <span>Bolivianita</span> Joyería</div>
   </div>
@@ -231,7 +232,7 @@ footer{background:var(--ink);color:#fff;padding:2.5rem 2rem 1rem;border-top:2px 
     <div class="wrap">
       <div class="sec-title"><h2>Gestión de tienda</h2><button class="btn btn-g" onclick="openProd()">+ Agregar Nuevo Producto al Catálogo</button></div>
       <div class="panel"><h3>Productos del catálogo</h3><div class="tw"><table>
-        <thead><tr><th></th><th>Código SKU</th><th>Producto</th><th>Precio (Bs.)</th><th>Stock</th><th></th></tr></thead>
+        <thead><tr><th></th><th>Código SKU</th><th>Producto</th><th>Precio (Bs.)</th><th>Stock</th><th>Estado</th><th></th></tr></thead>
         <tbody id="store-body"></tbody></table></div></div>
       <div class="panel"><h3>Pedidos de clientes</h3><div class="tw"><table>
         <thead><tr><th>Fecha</th><th>Cliente</th><th>Contacto</th><th>Pago</th><th>Productos</th><th>Total</th><th>Estado</th><th></th></tr></thead>
@@ -270,6 +271,34 @@ footer{background:var(--ink);color:#fff;padding:2.5rem 2rem 1rem;border-top:2px 
       </div>
     </div>
   </section>
+
+  <!-- PANEL GENERAL (solo administrador) -->
+  <section id="tab-panel" class="tab-content">
+    <div class="wrap">
+      <div class="sec-title"><h2>Panel general</h2></div>
+      <div class="panel"><h3>Usuarios</h3><div style="padding:1.1rem"><div class="stats" id="pg-users"></div></div></div>
+      <div class="panel"><h3>Catálogo y tienda</h3><div style="padding:1.1rem"><div class="stats" id="pg-store"></div></div></div>
+      <div class="panel"><h3>Inventario</h3><div style="padding:1.1rem"><div class="stats" id="pg-inv"></div></div></div>
+      <div class="panel"><h3>Pedidos</h3><div style="padding:1.1rem"><div class="stats" id="pg-orders"></div></div></div>
+      <div class="panel" style="margin-bottom:0"><h3>Accesos rápidos</h3><div class="toolbar" style="border-bottom:0">
+        <button class="btn" onclick="goTab('inventarios')">Sistema de Inventarios</button>
+        <button class="btn" onclick="goTab('graficos')">Esquemas y Gráficos</button>
+        <button class="btn" onclick="goTab('tienda')">Gestión de Tienda</button>
+        <button class="btn" onclick="goTab('empleados')">Gestión de Usuarios</button>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- GESTIÓN DE USUARIOS (solo administrador) -->
+  <section id="tab-empleados" class="tab-content">
+    <div class="wrap">
+      <div class="sec-title"><h2>Gestión de usuarios</h2><button class="btn btn-p" onclick="openUserModal()">+ Agregar usuario</button></div>
+      <div class="panel"><h3>Todos los usuarios registrados</h3><div class="tw"><table>
+        <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="emp-body"></tbody></table></div>
+        <div id="emp-empty" class="empty">Todavía no hay usuarios registrados.</div></div>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -305,16 +334,43 @@ footer{background:var(--ink);color:#fff;padding:2.5rem 2rem 1rem;border-top:2px 
       <input type="file" id="photo-in" accept="image/*" hidden onchange="pickPhoto(event)"></div></div>
     <label>Nombre</label><input class="fi" id="a-name" placeholder="Tu nombre">
   </div>
-  <label>Correo electrónico</label><input class="fi" id="a-mail" type="email" placeholder="correo@ejemplo.com" autocomplete="email" oninput="mailHint()">
+  <label>Correo electrónico</label><input class="fi" id="a-mail" type="email" placeholder="correo@ejemplo.com" autocomplete="email">
   <label>Contraseña</label><input class="fi" id="a-pass" type="password" placeholder="Mínimo 6 caracteres">
-  <label id="role-label">Rol</label>
-  <div class="roles">
-    <button type="button" class="rc on" id="r-cliente" onclick="setRole('cliente')"><b>Cliente</b>Compra joyas</button>
-    <button type="button" class="rc" id="r-empleado" onclick="setRole('empleado')"><b>Empleado</b>Catálogo e inventarios</button>
-    <button type="button" class="rc" id="r-admin" onclick="setRole('admin')"><b>Administrador</b>Acceso total</button>
-  </div>
-  <div id="code-box" style="display:none"><label id="code-label">Código de acceso</label><input class="fi" id="a-code" type="password" placeholder="Código entregado por la joyería" autocomplete="off"></div>
   <div class="mb"><button class="btn" onclick="closeModal('m-auth')">Cancelar</button><button class="btn btn-p" id="auth-go" onclick="doAuth()">Continuar</button></div>
+</div></div>
+
+<!-- ACCESO DE PERSONAL (acceso interno, no enlazado desde el sitio) -->
+<div class="ov" id="m-staff"><div class="md">
+  <div class="seg"><button id="st-t-login" onclick="staffTab('login')">Ingresar</button><button id="st-t-new" onclick="staffTab('new')">Primer administrador</button></div>
+  <h3 id="staff-title"></h3><p id="staff-sub"></p>
+  <div id="staff-new-only" style="display:none">
+    <label>Nombre</label><input class="fi" id="st-name" placeholder="Tu nombre">
+  </div>
+  <label>Correo electrónico</label><input class="fi" id="st-mail" type="email" placeholder="correo@ejemplo.com" autocomplete="off">
+  <label>Contraseña</label><input class="fi" id="st-pass" type="password" placeholder="Contraseña" autocomplete="off">
+  <div id="staff-code-only" style="display:none"><label>Código de administrador</label><input class="fi" id="st-code" type="password" placeholder="Código de administrador" autocomplete="off"></div>
+  <div class="mb"><button class="btn" onclick="closeModal('m-staff')">Cancelar</button><button class="btn btn-p" id="staff-go" onclick="doStaff()">Continuar</button></div>
+</div></div>
+
+<!-- CONFIRMAR ACCIÓN -->
+<div class="ov" id="m-confirm"><div class="md" style="text-align:center;max-width:420px">
+  <h3 id="confirm-title">¿Estás seguro?</h3>
+  <p id="confirm-msg" style="margin-bottom:1.3rem"></p>
+  <div class="mb" style="justify-content:center"><button class="btn" onclick="closeModal('m-confirm')">Cancelar</button><button class="btn btn-d" id="confirm-go">Sí, continuar</button></div>
+</div></div>
+
+<!-- MODAL NUEVO USUARIO (Vendedor o Administrador) -->
+<div class="ov" id="m-emp"><div class="md">
+  <h3>Agregar usuario</h3><p>Crea el acceso para un miembro del equipo. Podrás inhabilitarlo cuando quieras desde esta misma sección.</p>
+  <label>Tipo de cuenta</label>
+  <div class="roles" style="grid-template-columns:1fr 1fr">
+    <button type="button" class="rc on" id="er-empleado" onclick="setEmpRole('empleado')"><b>Vendedor</b>Catálogo e inventarios</button>
+    <button type="button" class="rc" id="er-admin" onclick="setEmpRole('admin')"><b>Administrador</b>Acceso total</button>
+  </div>
+  <label>Nombre</label><input class="fi" id="e-name" placeholder="Nombre del usuario">
+  <label>Correo electrónico</label><input class="fi" id="e-mail" type="email" placeholder="correo@ejemplo.com">
+  <label>Contraseña inicial</label><input class="fi" id="e-pass" type="password" placeholder="Mínimo 6 caracteres">
+  <div class="mb"><button class="btn" onclick="closeModal('m-emp')">Cancelar</button><button class="btn btn-p" onclick="saveEmployee()">Guardar usuario</button></div>
 </div></div>
 
 <!-- MODAL NUEVO PRODUCTO -->
@@ -400,7 +456,7 @@ let CODE_HASH=load('cb_codes',CODE_HASH_DEFAULT);
 async function sha(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{let h=5381;for(const c of s)h=(h*33)^c.charCodeAt(0);return 'f'+(h>>>0).toString(16)}}
 const checkCode=async(r,c)=>(await sha(c.trim().toUpperCase()))===CODE_HASH[r];
 const RANK={cliente:0,empleado:1,admin:2};
-const LABEL={cliente:'Cliente',empleado:'Empleado',admin:'Administrador'};
+const LABEL={cliente:'Cliente',empleado:'Vendedor',admin:'Administrador'};
 
 /* ===== DATOS (JSON en localStorage) ===== */
 const CAT0=[
@@ -421,16 +477,31 @@ const SEED=[
  {sku:'JOY-BOL-005',name:'Collar Plata con Bolivianita Oval',loc:'Vitrina Exhibición A',stock:10,min:2,price:210}
 ];
 let CAT=load('cb_cat',CAT0), inv=load('cb_inv2',SEED), sel=load('cb_sel',{}), orders=load('cb_orders',[]);
-let accounts=load('cb_acc3',[]), cur=load('cb_cur3',-1), curRole=load('cb_role',null), filt='Todas', src='all', pendingPhoto='', authMode='login', roleSel='cliente', curTab='inicio', prodImg='';
+let accounts=load('cb_acc3',[]), cur=load('cb_cur3',-1), curRole=load('cb_role',null), filt='Todas', src='all', pendingPhoto='', authMode='login', staffMode='login', curTab='inicio', prodImg='';
 const persist=()=>save('cb_inv2',inv), persistCat=()=>save('cb_cat',CAT);
 if(!accounts[cur])cur=-1;
 
-/* ===== ROLES ===== */
+/* ===== ROLES =====
+   La cuenta pública ("Inicia sesión / Regístrate" del encabezado) siempre es Cliente: no hay
+   selector de rol a la vista. Empleado y Administrador solo se obtienen por el acceso interno
+   (ver secretClick/doStaff más abajo), que no está enlazado desde ninguna parte visible del
+   sitio. Una cuenta inhabilitada pierde todo permiso aunque siga "con sesión iniciada". */
 const me=()=>accounts[cur]||null;
-const role=()=>me()?(curRole&&RANK[curRole]<=RANK[me().role]?curRole:'cliente'):'guest';
+const enabled=a=>!!a&&a.enabled!==false;
+const role=()=>{const a=me();if(!a||!enabled(a))return 'guest';return curRole&&RANK[curRole]<=RANK[a.role]?curRole:'cliente'};
 const isAdmin=()=>role()==='admin';
 const isStaff=()=>role()==='empleado'||role()==='admin';
-const TAB_NEED={inventarios:()=>isStaff(),tienda:()=>isAdmin(),graficos:()=>isAdmin()};
+const TAB_NEED={panel:()=>isAdmin(),inventarios:()=>isStaff(),tienda:()=>isAdmin(),graficos:()=>isAdmin(),empleados:()=>isAdmin()};
+// Cuenta de Administrador fija de la joyería: si todavía no existe en este navegador, se crea
+// automáticamente la primera vez que carga la página (accesible solo por el acceso interno oculto).
+const FIXED_ADMIN={name:'Administrador Bolivianita',email:'admin_bolivianitas@gmail.com',pass:'admin12345'};
+async function ensureFixedAdmin(){
+  if(!accounts.some(a=>a.email===FIXED_ADMIN.email)){
+    const hash=await sha(FIXED_ADMIN.email+'|'+FIXED_ADMIN.pass);
+    accounts.push({name:FIXED_ADMIN.name,email:FIXED_ADMIN.email,pass:hash,role:'admin',enabled:true,photo:''});
+    save('cb_acc3',accounts);
+  }
+}
 
 /* ===== CUENTA ===== */
 const initials=n=>(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -453,72 +524,182 @@ function switchRole(r){
 }
 function openAuth(mode){
   const acc=$('#acc');if(acc)acc.classList.remove('open');
-  pendingPhoto='';['a-name','a-mail','a-pass','a-code'].forEach(i=>$('#'+i).value='');$('#photo-prev').innerHTML='?';
-  setRole('cliente');authTab(mode);openModal('m-auth');
+  pendingPhoto='';['a-name','a-mail','a-pass'].forEach(i=>$('#'+i).value='');$('#photo-prev').innerHTML='?';
+  authTab(mode);openModal('m-auth');
 }
 function authTab(t){
   authMode=t;
   $('#t-login').classList.toggle('on',t==='login');$('#t-reg').classList.toggle('on',t==='reg');
   $('#reg-only').style.display=t==='reg'?'block':'none';
   $('#auth-title').textContent=t==='login'?'Bienvenido de nuevo':'Crea tu cuenta';
-  $('#auth-sub').textContent=t==='login'?'Ingresa con tu correo y elige con qué rol quieres entrar.':'Completa tus datos y elige tu rol.';
-  $('#role-label').textContent=t==='login'?'Entrar como':'Tipo de cuenta';
+  $('#auth-sub').textContent=t==='login'?'Ingresa con tu correo y contraseña.':'Completa tus datos para comprar en la joyería.';
   $('#auth-go').textContent=t==='login'?'Ingresar':'Crear cuenta';
-  setRole(roleSel);
-}
-function setRole(r){
-  roleSel=r;['cliente','empleado','admin'].forEach(k=>$('#r-'+k).classList.toggle('on',k===r));
-  $('#code-box').style.display=r==='cliente'?'none':'block';
-  $('#code-label').textContent=r==='admin'?'Código de administrador':'Código de empleado';
-}
-function mailHint(){
-  if(authMode!=='login')return;
-  const a=accounts.find(x=>x.email===$('#a-mail').value.trim().toLowerCase());
-  if(a)setRole(a.role);
 }
 function pickPhoto(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=160;const x=c.getContext('2d'),s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);pendingPhoto=c.toDataURL('image/jpeg',.8);$('#photo-prev').innerHTML=`<img src="${pendingPhoto}">`};im.src=r.result};r.readAsDataURL(f);
 }
 async function doAuth(){
-  const email=$('#a-mail').value.trim().toLowerCase(),pass=$('#a-pass').value,code=$('#a-code').value,r=roleSel;
+  const email=$('#a-mail').value.trim().toLowerCase(),pass=$('#a-pass').value;
   if(!/\S+@\S+\.\S+/.test(email)){toast('Escribe un correo válido');return}
   if(pass.length<6){toast('La contraseña debe tener al menos 6 caracteres');return}
   const hash=await sha(email+'|'+pass);
   if(authMode==='login'){
-    const i=accounts.findIndex(a=>a.email===email);
+    // Solo cuentas de Cliente ingresan por aquí: cualquier otra coincidencia se trata igual
+    // que un dato incorrecto, para no revelar que existen otros tipos de cuenta.
+    const i=accounts.findIndex(a=>a.email===email&&a.role==='cliente');
     if(i<0||accounts[i].pass!==hash){toast('Correo o contraseña incorrectos');return}
-    if(RANK[r]>RANK[accounts[i].role]){toast('Tu cuenta no tiene permiso para entrar como '+LABEL[r]);return}
-    if(r!=='cliente'&&!(await checkCode(r,code))){toast(code?'Código incorrecto':'Ingresa el código de acceso');return}
     cur=i;
   }else{
     const name=$('#a-name').value.trim();
     if(!name){toast('Escribe tu nombre');return}
     if(accounts.some(a=>a.email===email)){toast('Ese correo ya tiene cuenta. Usa “Ingresar”');return}
-    if(r!=='cliente'&&!(await checkCode(r,code))){toast('Código incorrecto. No se puede crear una cuenta de '+LABEL[r]);return}
-    accounts.push({name,email,pass:hash,role:r,photo:pendingPhoto});cur=accounts.length-1;save('cb_acc3',accounts);
+    accounts.push({name,email,pass:hash,role:'cliente',enabled:true,photo:pendingPhoto});cur=accounts.length-1;save('cb_acc3',accounts);
   }
-  curRole=r;save('cb_cur3',cur);save('cb_role',curRole);
-  closeModal('m-auth');renderAll();goTab('inicio');toast(`Hola, ${me().name} (${LABEL[r]})`);
+  curRole='cliente';save('cb_cur3',cur);save('cb_role',curRole);
+  closeModal('m-auth');renderAll();goTab('inicio');toast(`Hola, ${me().name}`);
 }
 function logout(){cur=-1;curRole=null;save('cb_cur3',cur);save('cb_role',curRole);renderAll();goTab('inicio');toast('Sesión cerrada')}
 function needLogin(){openModal('m-need')}
 
+/* ===== ACCESO INTERNO (Empleado / Administrador) =====
+   No hay ningún botón ni enlace visible para esto: se abre tocando 5 veces seguidas (en menos
+   de 2 segundos) el logo/nombre de la marca en el encabezado. Un cliente que nunca sepa del
+   gesto no tiene forma de encontrar ni de adivinar que esta puerta existe. */
+let _clicks=[];
+function secretClick(){
+  const now=Date.now();_clicks=_clicks.filter(t=>now-t<2200);_clicks.push(now);
+  if(_clicks.length>=5){_clicks=[];openStaff('login')}
+}
+function openStaff(mode){
+  ['st-name','st-mail','st-pass','st-code'].forEach(i=>$('#'+i).value='');
+  staffTab(mode);openModal('m-staff');
+}
+function staffTab(t){
+  staffMode=t;
+  $('#st-t-login').classList.toggle('on',t==='login');$('#st-t-new').classList.toggle('on',t==='new');
+  $('#staff-new-only').style.display=t==='new'?'block':'none';
+  $('#staff-code-only').style.display=t==='new'?'block':'none';
+  $('#staff-title').textContent=t==='login'?'Acceso de personal':'Crear acceso de administrador';
+  $('#staff-sub').textContent=t==='login'?'Exclusivo para empleados y administradores autorizados.':'Úsalo solo si todavía no existe ninguna cuenta de administrador.';
+  $('#staff-go').textContent=t==='login'?'Ingresar':'Crear administrador';
+}
+async function doStaff(){
+  const email=$('#st-mail').value.trim().toLowerCase(),pass=$('#st-pass').value;
+  if(!/\S+@\S+\.\S+/.test(email)||pass.length<6){toast('Revisa el correo y la contraseña');return}
+  const hash=await sha(email+'|'+pass);
+  if(staffMode==='login'){
+    const i=accounts.findIndex(a=>a.email===email&&(a.role==='empleado'||a.role==='admin'));
+    if(i<0||accounts[i].pass!==hash||!enabled(accounts[i])){toast('Acceso no autorizado');return}
+    cur=i;curRole=accounts[i].role;
+  }else{
+    const name=$('#st-name').value.trim(),code=$('#st-code').value;
+    if(!name){toast('Escribe tu nombre');return}
+    if(accounts.some(a=>a.email===email)){toast('Ese correo ya tiene una cuenta');return}
+    if(!(await checkCode('admin',code))){toast('Código incorrecto');return}
+    accounts.push({name,email,pass:hash,role:'admin',enabled:true,photo:''});cur=accounts.length-1;curRole='admin';
+  }
+  save('cb_acc3',accounts);save('cb_cur3',cur);save('cb_role',curRole);
+  closeModal('m-staff');renderAll();goTab('inicio');toast(`Hola, ${me().name} (${LABEL[role()]})`);
+}
+
+/* ===== GESTIÓN DE USUARIOS (solo administrador) =====
+   Muestra a TODOS los usuarios de la página (clientes, vendedores y administradores).
+   Desde aquí el administrador agrega directamente un Vendedor o a otro Administrador,
+   y puede inhabilitar/habilitar el acceso de cualquier cuenta sin borrarla. */
+let empRoleSel='empleado';
+function openUserModal(){
+  if(!isAdmin())return;
+  ['e-name','e-mail','e-pass'].forEach(i=>$('#'+i).value='');setEmpRole('empleado');openModal('m-emp');
+}
+function setEmpRole(r){empRoleSel=r;['empleado','admin'].forEach(k=>$('#er-'+k).classList.toggle('on',k===r))}
+function renderEmployees(){
+  if(!isAdmin())return;
+  const list=accounts.map((a,i)=>({a,i}));
+  $('#emp-empty').style.display=list.length?'none':'block';
+  $('#emp-body').innerHTML=list.map(({a,i})=>{
+    const on=enabled(a),self=i===cur,cls=a.role==='admin'?'adm':a.role==='empleado'?'emp':'';
+    return `<tr class="${on?'':'disabled-row'}"><td><b>${esc(a.name)}</b>${self?' <small>(tú)</small>':''}</td><td>${esc(a.email)}</td>
+    <td><span class="role ${cls}">${LABEL[a.role]}</span></td><td><span class="badge ${on?'':'off'}">${on?'Activo':'Inhabilitado'}</span></td>
+    <td>${self?'':`<button class="btn btn-sm ${on?'btn-d':'btn-g'}" onclick="toggleEmployee(${i})">${on?'Inhabilitar':'Habilitar'}</button>`}</td></tr>`;
+  }).join('');
+}
+function toggleEmployee(i){
+  if(!isAdmin()||i===cur)return;
+  const a=accounts[i],on=enabled(a);
+  showConfirm(on?'Inhabilitar acceso':'Habilitar acceso',
+    on?`${a.name} (${LABEL[a.role]}) no podrá ingresar hasta que vuelvas a habilitarlo.`:`¿Permitir que ${a.name} vuelva a ingresar como ${LABEL[a.role]}?`,
+    ()=>{a.enabled=!on;save('cb_acc3',accounts);renderEmployees();renderPanel();toast(a.enabled?'Acceso habilitado':'Acceso inhabilitado')});
+}
+function saveEmployee(){
+  if(!isAdmin())return;
+  const name=$('#e-name').value.trim(),email=$('#e-mail').value.trim().toLowerCase(),pass=$('#e-pass').value,r=empRoleSel;
+  if(!name){toast('Escribe el nombre del usuario');return}
+  if(!/\S+@\S+\.\S+/.test(email)){toast('Escribe un correo válido');return}
+  if(pass.length<6){toast('La contraseña debe tener al menos 6 caracteres');return}
+  if(accounts.some(a=>a.email===email)){toast('Ese correo ya tiene una cuenta');return}
+  sha(email+'|'+pass).then(hash=>{
+    accounts.push({name,email,pass:hash,role:r,enabled:true,photo:''});
+    save('cb_acc3',accounts);closeModal('m-emp');['e-name','e-mail','e-pass'].forEach(i=>$('#'+i).value='');renderEmployees();renderPanel();toast(`${LABEL[r]} agregado`);
+  });
+}
+
+/* ===== PANEL GENERAL (solo administrador) =====
+   Reúne, de forma organizada, los números que ya existen en las demás secciones. */
+function renderPanel(){
+  if(!isAdmin())return;
+  const clientes=accounts.filter(a=>a.role==='cliente').length;
+  const vendedores=accounts.filter(a=>a.role==='empleado').length;
+  const admins=accounts.filter(a=>a.role==='admin').length;
+  const inhabilitados=accounts.filter(a=>!enabled(a)).length;
+  $('#pg-users').innerHTML=`
+    <div class="kpi"><small>Total de usuarios</small><b>${accounts.length}</b></div>
+    <div class="kpi"><small>Clientes</small><b>${clientes}</b></div>
+    <div class="kpi"><small>Vendedores</small><b>${vendedores}</b></div>
+    <div class="kpi"><small>Administradores</small><b>${admins}</b></div>
+    <div class="kpi warn"><small>Cuentas inhabilitadas</small><b>${inhabilitados}</b></div>`;
+  const visibles=CAT.filter(isActive).length,ocultos=CAT.length-visibles;
+  $('#pg-store').innerHTML=`
+    <div class="kpi"><small>Productos en el catálogo</small><b>${CAT.length}</b></div>
+    <div class="kpi"><small>Visibles para clientes</small><b>${visibles}</b></div>
+    <div class="kpi warn"><small>Ocultos</small><b>${ocultos}</b></div>`;
+  $('#pg-inv').innerHTML=`
+    <div class="kpi"><small>Joyas en inventario</small><b>${inv.length}</b></div>
+    <div class="kpi"><small>Unidades en stock</small><b>${inv.reduce((a,i)=>a+i.stock,0)}</b></div>
+    <div class="kpi"><small>Valor del inventario</small><b>${bs(inv.reduce((a,i)=>a+i.stock*i.price,0))}</b></div>
+    <div class="kpi warn"><small>Bajo stock o agotado</small><b>${inv.filter(i=>i.stock<=i.min).length}</b></div>`;
+  $('#pg-orders').innerHTML=`
+    <div class="kpi"><small>Pedidos totales</small><b>${orders.length}</b></div>
+    <div class="kpi warn"><small>Pendientes</small><b>${orders.filter(o=>o.status==='Pendiente').length}</b></div>
+    <div class="kpi"><small>Entregados</small><b>${orders.filter(o=>o.status==='Entregado').length}</b></div>
+    <div class="kpi"><small>Cancelados</small><b>${orders.filter(o=>o.status==='Cancelado').length}</b></div>`;
+}
+
+/* ===== CONFIRMACIÓN GENÉRICA (acciones delicadas) ===== */
+let _confirmCb=null;
+function showConfirm(title,msg,cb){
+  $('#confirm-title').textContent=title;$('#confirm-msg').textContent=msg;_confirmCb=cb;openModal('m-confirm');
+}
+$('#confirm-go').onclick=()=>{const cb=_confirmCb;_confirmCb=null;closeModal('m-confirm');if(cb)cb()};
+
 /* ===== NAVEGACIÓN ===== */
 function renderNav(){
   const t=[['inicio','Catálogo']];
+  if(isAdmin())t.push(['panel','Panel General']);
   if(isStaff())t.push(['inventarios','Sistema de Inventarios']);
-  if(isAdmin())t.push(['graficos','Esquemas y Gráficos'],['tienda','Gestión de Tienda']);
+  if(isAdmin())t.push(['graficos','Esquemas y Gráficos'],['tienda','Gestión de Tienda'],['empleados','Gestión de Usuarios']);
   $('#nav').innerHTML=t.map(([k,l])=>`<button class="tab-btn ${k===curTab?'active':''}" onclick="goTab('${k}')">${l}</button>`).join('');
 }
 function goTab(t){
   if(TAB_NEED[t]&&!TAB_NEED[t]()){if(!me())needLogin();else toast('No tienes permiso para esta sección');t='inicio'}
   curTab=t;
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id==='tab-'+t));
-  renderNav();if(t==='graficos')renderCharts();window.scrollTo({top:0});
+  renderNav();if(t==='graficos')renderCharts();if(t==='empleados')renderEmployees();if(t==='panel')renderPanel();window.scrollTo({top:0});
 }
 function renderAll(){
+  if(me()&&!enabled(me())){cur=-1;curRole=null;save('cb_cur3',cur);save('cb_role',curRole);toast('Tu acceso fue inhabilitado.')}
   renderAuth();renderNav();renderChips();renderCatalog();updCart();renderInv();renderStore();renderOrders();
+  if(isAdmin()){renderEmployees();renderPanel()}
   $('#cart-btn').style.display=me()?'block':'none';
 }
 
@@ -528,10 +709,11 @@ function renderChips(){
   const cats=['Todas',...new Set(CAT.map(c=>c.cat))];
   $('#chips').innerHTML=cats.map(c=>`<button class="chip ${c===filt?'on':''}" onclick="filt='${esc(c)}';renderChips();renderCatalog()">${esc(c)}</button>`).join('');
 }
+const isActive=p=>p.active!==false;
 function renderCatalog(){
   const logged=!!me(),staff=isStaff();
   $('#admin-bar').innerHTML=isAdmin()?`<button class="btn btn-g" onclick="openProd()">+ Agregar Nuevo Producto al Catálogo</button>`:'';
-  $('#catalog').innerHTML=CAT.filter(p=>filt==='Todas'||p.cat===filt).map(p=>{
+  $('#catalog').innerHTML=CAT.filter(p=>isActive(p)&&(filt==='Todas'||p.cat===filt)).map(p=>{
     let ctl='';
     if(logged){
       const q=qtyState[p.cod]||1;
@@ -577,18 +759,19 @@ function saveProd(){
   if(!(price>=0)||isNaN(price)){toast('Escribe un precio válido en Bs.');return}
   if(isNaN(stock)||stock<0){toast('Escribe un stock inicial válido');return}
   if(CAT.some(c=>c.cod===sku)){toast('Ya existe un producto con ese código SKU');return}
-  CAT.unshift({cod:sku,name,cat:guessCat(name),stock,price,img:prodImg});persistCat();
+  CAT.unshift({cod:sku,name,cat:guessCat(name),stock,price,img:prodImg,active:true});persistCat();
   const e=find(sku);if(e){e.stock+=stock;e.price=price}else inv.push({sku,name,loc:'Vitrina Exhibición A',stock,min:2,price});
   persist();closeModal('m-prod');renderChips();renderCatalog();renderInv();renderStore();toast('Producto agregado al catálogo e inventario');
 }
 
 /* ===== GESTIÓN DE TIENDA (administrador) ===== */
 function renderStore(){
-  $('#store-body').innerHTML=CAT.map(p=>`<tr><td><img class="th" src="${p.img||ph(p.cod)}" alt="" onerror="this.onerror=null;this.src=ph('${esc(p.cod)}')"></td><td><b>${esc(p.cod)}</b></td>
+  $('#store-body').innerHTML=CAT.map(p=>{const on=isActive(p);return `<tr class="${on?'':'disabled-row'}"><td><img class="th" src="${p.img||ph(p.cod)}" alt="" onerror="this.onerror=null;this.src=ph('${esc(p.cod)}')"></td><td><b>${esc(p.cod)}</b></td>
   <td><input class="nm" type="text" value="${esc(p.name)}" onchange="setName('${esc(p.cod)}',this.value)"></td>
   <td><input class="mini" type="number" min="0" step="0.01" value="${p.price}" onchange="setPrice('${esc(p.cod)}',this.value)"></td>
   <td><div class="stk"><button class="qb" onclick="storeStock('${esc(p.cod)}',-1)">−</button><b>${p.stock}</b><button class="qb" onclick="storeStock('${esc(p.cod)}',1)">+</button></div></td>
-  <td><div class="acts"><label class="btn btn-sm" style="cursor:pointer">Cambiar imagen<input type="file" accept="image/*" hidden onchange="setImg('${esc(p.cod)}',event)"></label><button class="btn btn-sm btn-d" onclick="delProd('${esc(p.cod)}')">Quitar del catálogo</button></div></td></tr>`).join('');
+  <td><span class="badge ${on?'':'off'}">${on?'Visible':'Oculto'}</span></td>
+  <td><div class="acts"><label class="btn btn-sm" style="cursor:pointer">Cambiar imagen<input type="file" accept="image/*" hidden onchange="setImg('${esc(p.cod)}',event)"></label><button class="btn btn-sm ${on?'btn-d':'btn-g'}" onclick="toggleProd('${esc(p.cod)}')">${on?'Quitar del catálogo':'Habilitar en catálogo'}</button></div></td></tr>`}).join('');
 }
 function setName(cod,v){
   if(!isAdmin())return;v=v.trim();if(!v){toast('El nombre no puede estar vacío');renderStore();return}
@@ -601,9 +784,12 @@ function setImg(cod,e){
 }
 function setPrice(cod,v){if(!isAdmin())return;const n=parseFloat(v)||0;CAT.find(c=>c.cod===cod).price=n;const i=find(cod);if(i)i.price=n;persistCat();persist();renderCatalog();renderInv();toast('Precio actualizado')}
 function storeStock(cod,d){if(!isAdmin())return;setStock(cod,stockOf(cod)+d);renderStore();renderCatalog();renderInv()}
-function delProd(cod){
-  if(!isAdmin()||!confirm('¿Quitar este producto del catálogo? (seguirá en el inventario)'))return;
-  CAT=CAT.filter(c=>c.cod!==cod);delete sel[cod];persistCat();updCart();renderChips();renderCatalog();renderStore();
+function toggleProd(cod){
+  if(!isAdmin())return;
+  const c=CAT.find(x=>x.cod===cod),on=isActive(c);
+  showConfirm(on?'Quitar del catálogo':'Habilitar en catálogo',
+    on?`"${c.name}" se ocultará del catálogo (los clientes ya no lo verán), pero seguirá en el inventario y podrás habilitarlo cuando quieras.`:`"${c.name}" volverá a mostrarse en el catálogo para los clientes.`,
+    ()=>{c.active=!on;if(!c.active)delete sel[cod];persistCat();updCart();renderChips();renderCatalog();renderStore();toast(c.active?'Producto habilitado en el catálogo':'Producto oculto del catálogo')});
 }
 
 /* ===== CARRITO Y COMPRA ===== */
@@ -683,10 +869,18 @@ function renderInv(){
 const find=s=>inv.find(i=>i.sku===s);
 function stk(s,d){if(!isStaff())return;setStock(s,find(s).stock+d);renderInv();renderCatalog();renderStore()}
 function setMin(s,v){if(!isStaff())return;find(s).min=Math.max(0,parseInt(v)||0);persist();renderInv()}
-function del(s){if(!isStaff())return;inv=inv.filter(i=>i.sku!==s);persist();renderInv()}
+function del(s){
+  if(!isStaff())return;const it=find(s);if(!it)return;
+  showConfirm('¿Estás seguro?',`Vas a eliminar permanentemente "${it.name}" (${it.sku}) del inventario. Esta información es importante: una vez eliminada no se puede recuperar.`,
+    ()=>{inv=inv.filter(i=>i.sku!==s);persist();renderInv();toast('Joya eliminada del inventario')});
+}
 function selectedSkus(){return [...document.querySelectorAll('.rcb:checked')].map(c=>c.value)}
 function toggleAll(m){document.querySelectorAll('.rcb').forEach(c=>c.checked=m.checked)}
-function delSelected(){if(!isStaff())return;const s=selectedSkus();if(!s.length){toast('Selecciona filas primero');return}inv=inv.filter(i=>!s.includes(i.sku));persist();renderInv();toast(s.length+' eliminado(s)')}
+function delSelected(){
+  if(!isStaff())return;const s=selectedSkus();if(!s.length){toast('Selecciona filas primero');return}
+  showConfirm('¿Estás seguro?',`Vas a eliminar permanentemente ${s.length} fila(s) del inventario. Esta información es importante: ten cuidado, no se puede deshacer.`,
+    ()=>{inv=inv.filter(i=>!s.includes(i.sku));persist();renderInv();toast(s.length+' eliminado(s)')});
+}
 function copyRows(){const s=selectedSkus();if(!s.length){toast('Selecciona filas primero');return}copyText(inv.filter(i=>s.includes(i.sku)).map(i=>`${i.sku}\t${i.name}\t${i.stock}`).join('\n'),s.length+' fila(s) copiadas')}
 function addManual(){
   if(!isStaff())return;
@@ -766,7 +960,7 @@ function renderCharts(){
   const imgs=Array.from({length:10},(_,i)=>`nuevo${i+1}.jpg`);
   $('#track').innerHTML=[...imgs,...imgs].map((s,i)=>`<div class="mq"><img src="${s}" alt="Novedad" onerror="this.onerror=null;this.src=ph('Novedad ${i%10+1}')"></div>`).join('');
 })();
-renderAll();
+ensureFixedAdmin().then(renderAll);
 </script>
 </body>
 </html>
