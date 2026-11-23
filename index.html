@@ -154,7 +154,7 @@ footer{background:var(--ink);color:#fff;padding:2.5rem 2rem 1rem;border-top:2px 
 <body>
 
 <header>
-  <div class="brand-box" onclick="secretClick()" title="Creaciones Bolivianita Joyería">
+  <div class="brand-box">
     <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
     <div class="brand">Creaciones <span>Bolivianita</span> Joyería</div>
   </div>
@@ -324,6 +324,13 @@ footer{background:var(--ink);color:#fff;padding:2.5rem 2rem 1rem;border-top:2px 
   <div class="mb" style="justify-content:center"><button class="btn" onclick="closeModal('m-need')">Ahora no</button><button class="btn btn-p" onclick="closeModal('m-need');openAuth('login')">Inicia sesión</button><button class="btn btn-g" onclick="closeModal('m-need');openAuth('reg')">Regístrate</button></div>
 </div></div>
 
+<!-- ALERTAS DE SEGURIDAD (solo administrador) -->
+<div class="ov" id="m-alerts"><div class="md" style="max-width:520px">
+  <h3>🔔 Alertas de seguridad</h3><p>Intentos de usar tu cuenta de administrador.</p>
+  <div id="alerts-list" style="margin:1rem 0"></div>
+  <div class="mb"><button class="btn" onclick="closeModal('m-alerts')">Cerrar</button><button class="btn btn-d" onclick="clearAlerts()">Borrar todo</button></div>
+</div></div>
+
 <!-- MODAL CUENTA -->
 <div class="ov" id="m-auth"><div class="md">
   <div class="seg"><button id="t-login" onclick="authTab('login')">Ingresar</button><button id="t-reg" onclick="authTab('reg')">Crear cuenta</button></div>
@@ -337,19 +344,6 @@ footer{background:var(--ink);color:#fff;padding:2.5rem 2rem 1rem;border-top:2px 
   <label>Correo electrónico</label><input class="fi" id="a-mail" type="email" placeholder="correo@ejemplo.com" autocomplete="email">
   <label>Contraseña</label><input class="fi" id="a-pass" type="password" placeholder="Mínimo 6 caracteres">
   <div class="mb"><button class="btn" onclick="closeModal('m-auth')">Cancelar</button><button class="btn btn-p" id="auth-go" onclick="doAuth()">Continuar</button></div>
-</div></div>
-
-<!-- ACCESO DE PERSONAL (acceso interno, no enlazado desde el sitio) -->
-<div class="ov" id="m-staff"><div class="md">
-  <div class="seg"><button id="st-t-login" onclick="staffTab('login')">Ingresar</button><button id="st-t-new" onclick="staffTab('new')">Primer administrador</button></div>
-  <h3 id="staff-title"></h3><p id="staff-sub"></p>
-  <div id="staff-new-only" style="display:none">
-    <label>Nombre</label><input class="fi" id="st-name" placeholder="Tu nombre">
-  </div>
-  <label>Correo electrónico</label><input class="fi" id="st-mail" type="email" placeholder="correo@ejemplo.com" autocomplete="off">
-  <label>Contraseña</label><input class="fi" id="st-pass" type="password" placeholder="Contraseña" autocomplete="off">
-  <div id="staff-code-only" style="display:none"><label>Código de administrador</label><input class="fi" id="st-code" type="password" placeholder="Código de administrador" autocomplete="off"></div>
-  <div class="mb"><button class="btn" onclick="closeModal('m-staff')">Cancelar</button><button class="btn btn-p" id="staff-go" onclick="doStaff()">Continuar</button></div>
 </div></div>
 
 <!-- CONFIRMAR ACCIÓN -->
@@ -448,13 +442,7 @@ document.querySelectorAll('.ov').forEach(o=>o.addEventListener('mousedown',e=>{i
 
 /* ===== CONFIGURACIÓN DE ACCESO ===== */
 const WA='59170000000';
-// Códigos guardados como huella SHA-256 (no aparecen en texto plano). Códigos iniciales:
-// Empleado: 3mpl3ado2026   Administrador: admin12345
-// El Administrador puede cambiarlos desde el menú de cuenta ("Cambiar códigos de acceso").
-const CODE_HASH_DEFAULT={empleado:'cd626e23a395f3d5939b820e90cdac9f0463e29b67b14e0b4042ec45b1959a15',admin:'ce1a850a19682e82f96266c7dc27893ffb08fc53f37d60f7a233c712f7a7e29f'};
-let CODE_HASH=load('cb_codes',CODE_HASH_DEFAULT);
 async function sha(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{let h=5381;for(const c of s)h=(h*33)^c.charCodeAt(0);return 'f'+(h>>>0).toString(16)}}
-const checkCode=async(r,c)=>(await sha(c.trim().toUpperCase()))===CODE_HASH[r];
 const RANK={cliente:0,empleado:1,admin:2};
 const LABEL={cliente:'Cliente',empleado:'Vendedor',admin:'Administrador'};
 
@@ -482,26 +470,53 @@ const persist=()=>save('cb_inv2',inv), persistCat=()=>save('cb_cat',CAT);
 if(!accounts[cur])cur=-1;
 
 /* ===== ROLES =====
-   La cuenta pública ("Inicia sesión / Regístrate" del encabezado) siempre es Cliente: no hay
-   selector de rol a la vista. Empleado y Administrador solo se obtienen por el acceso interno
-   (ver secretClick/doStaff más abajo), que no está enlazado desde ninguna parte visible del
-   sitio. Una cuenta inhabilitada pierde todo permiso aunque siga "con sesión iniciada". */
+   Cliente y Vendedor ingresan por "Inicia sesión". La cuenta de Administrador solo se abre con
+   su correo y contraseña; cualquier otro intento sobre esa cuenta se cuenta, bloquea y avisa al
+   admin (ver doAuth / adminIntrusion). Una cuenta inhabilitada pierde todo permiso. */
 const me=()=>accounts[cur]||null;
 const enabled=a=>!!a&&a.enabled!==false;
 const role=()=>{const a=me();if(!a||!enabled(a))return 'guest';return curRole&&RANK[curRole]<=RANK[a.role]?curRole:'cliente'};
 const isAdmin=()=>role()==='admin';
 const isStaff=()=>role()==='empleado'||role()==='admin';
 const TAB_NEED={panel:()=>isAdmin(),inventarios:()=>isStaff(),tienda:()=>isAdmin(),graficos:()=>isAdmin(),empleados:()=>isAdmin()};
-// Cuenta de Administrador fija de la joyería: si todavía no existe en este navegador, se crea
-// automáticamente la primera vez que carga la página (accesible solo por el acceso interno oculto).
-const FIXED_ADMIN={name:'Administrador Bolivianita',email:'admin_bolivianitas@gmail.com',pass:'admin12345'};
+// Cuenta de Administrador fija. En el código solo se guarda el HASH de correo+contraseña
+// (no la contraseña en texto plano). Dos hashes: SHA-256 (normal) y uno de respaldo para
+// navegadores sin crypto.subtle.
+const ADMIN_EMAIL='admin_bolivianitas@gmail.com', ADMIN_NAME='admin';
+const ADMIN_HASH={s:'dcac466b4bbdb9aa00619cd626c62b424a9d0dea9405d9a3e7b6431cbcd1d27f',f:'f94f74ac1'};
+const isAdminHash=h=>h===ADMIN_HASH.s||h===ADMIN_HASH.f;
+const MAX_FAILS=3, LOCK_MIN=30;   // intentos fallidos permitidos y minutos de bloqueo (pon MAX_FAILS=1 para bloquear de inmediato)
+let alerts=load('cb_alerts',[]), lockInfo=load('cb_lock',{fails:0,until:0});
 async function ensureFixedAdmin(){
-  if(!accounts.some(a=>a.email===FIXED_ADMIN.email)){
-    const hash=await sha(FIXED_ADMIN.email+'|'+FIXED_ADMIN.pass);
-    accounts.push({name:FIXED_ADMIN.name,email:FIXED_ADMIN.email,pass:hash,role:'admin',enabled:true,photo:''});
-    save('cb_acc3',accounts);
-  }
+  const h=(window.crypto&&crypto.subtle)?ADMIN_HASH.s:ADMIN_HASH.f;
+  const a=accounts.find(x=>x.email===ADMIN_EMAIL);
+  if(!a)accounts.push({name:ADMIN_NAME,email:ADMIN_EMAIL,pass:h,role:'admin',enabled:true,photo:''});
+  else{a.name=ADMIN_NAME;a.role='admin';a.enabled=true;a.pass=h}
+  save('cb_acc3',accounts);
 }
+const lockLeft=()=>Math.max(0,(lockInfo.until||0)-Date.now());
+const lockMsg=()=>`Cuenta bloqueada por seguridad. Intenta de nuevo en ${Math.ceil(lockLeft()/60000)} min.`;
+function addAlert(detail){
+  alerts.unshift({id:Date.now(),when:new Date().toISOString(),detail,read:false});
+  alerts=alerts.slice(0,50);save('cb_alerts',alerts);
+}
+// Alguien que NO es el admin intentó usar la cuenta del admin: se cuenta el intento,
+// se bloquea al llegar al máximo y se deja un mensaje para el admin.
+function adminIntrusion(via){
+  lockInfo.fails=(lockInfo.fails||0)+1;
+  const blocked=lockInfo.fails>=MAX_FAILS;
+  if(blocked){lockInfo.until=Date.now()+LOCK_MIN*60000;lockInfo.fails=0}
+  save('cb_lock',lockInfo);
+  addAlert(`Alguien intentó usar tu cuenta de administrador (${via}) con datos incorrectos.`+(blocked?` La cuenta quedó BLOQUEADA ${LOCK_MIN} minutos.`:` Intento ${lockInfo.fails} de ${MAX_FAILS}.`));
+  return blocked;
+}
+const unread=()=>alerts.filter(x=>!x.read).length;
+function openAlerts(){
+  $('#alerts-list').innerHTML=alerts.length?alerts.map(x=>`<div style="border:1px solid var(--bd);border-left:4px solid ${x.read?'var(--bd)':'var(--bad)'};border-radius:8px;padding:.7rem .9rem;margin-bottom:.6rem;font-size:.85rem"><small style="color:var(--mu)">${new Date(x.when).toLocaleString('es-BO')}</small><div>${esc(x.detail)}</div></div>`).join(''):'<div class="empty">No hay alertas. Todo en orden.</div>';
+  openModal('m-alerts');
+  alerts.forEach(x=>x.read=true);save('cb_alerts',alerts);renderAuth();
+}
+function clearAlerts(){alerts=[];save('cb_alerts',alerts);closeModal('m-alerts');renderAuth();if(isAdmin())renderPanel()}
 
 /* ===== CUENTA ===== */
 const initials=n=>(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -511,9 +526,10 @@ function renderAuth(){
   if(!a){z.innerHTML=`<div style="display:flex;gap:12px;align-items:center"><button class="btn-link" onclick="openAuth('login')">Inicia sesión</button><button class="btn-outline" onclick="openAuth('reg')">Regístrate</button></div>`;return}
   const r=role(),cls=r==='admin'?'adm':r==='empleado'?'emp':'';
   const sw=a.role!=='cliente'?`<div class="rsw-box">VER COMO<div class="rsw">${['cliente','empleado','admin'].filter(k=>RANK[k]<=RANK[a.role]).map(k=>`<button class="${k===r?'on':''}" onclick="switchRole('${k}')">${LABEL[k]}</button>`).join('')}</div></div>`:'';
-  z.innerHTML=`<div class="account" id="acc"><button class="acc-btn" onclick="$('#acc').classList.toggle('open')" aria-label="Cuenta">${avatarHTML(a)}<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></button>
+  const bell=r==='admin'?`<button class="cart-btn" style="display:block;margin-right:10px" onclick="openAlerts()" aria-label="Alertas de seguridad">🔔${unread()?`<b style="background:var(--bad);color:#fff">${unread()}</b>`:''}</button>`:'';
+  z.innerHTML=`<div style="display:flex;align-items:center">${bell}<div class="account" id="acc"><button class="acc-btn" onclick="$('#acc').classList.toggle('open')" aria-label="Cuenta">${avatarHTML(a)}<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></button>
   <div class="menu"><div class="menu-head">${avatarHTML(a)}<div><b>${esc(a.name)}</b><small>${esc(a.email)}</small><span class="role ${cls}">${LABEL[r]}</span></div></div>${sw}
-  <button onclick="openAuth('login')">➕ Agregar cuenta</button><button class="out" onclick="logout()">⏻ Cerrar sesión</button></div></div>`;
+  <button onclick="openAuth('login')">➕ Agregar cuenta</button><button class="out" onclick="logout()">⏻ Cerrar sesión</button></div></div></div>`;
 }
 document.addEventListener('click',e=>{const a=$('#acc');if(a&&!a.contains(e.target))a.classList.remove('open')});
 function switchRole(r){
@@ -542,66 +558,38 @@ function pickPhoto(e){
 async function doAuth(){
   const email=$('#a-mail').value.trim().toLowerCase(),pass=$('#a-pass').value;
   if(!/\S+@\S+\.\S+/.test(email)){toast('Escribe un correo válido');return}
-  if(pass.length<6){toast('La contraseña debe tener al menos 6 caracteres');return}
   const hash=await sha(email+'|'+pass);
+  // --- Cuenta del administrador: solo el admin con su contraseña puede usarla (ingresar o "registrarse") ---
+  if(email===ADMIN_EMAIL){
+    if(lockLeft()>0){toast(lockMsg());return}
+    if(!isAdminHash(hash)){
+      const blocked=adminIntrusion(authMode==='login'?'inicio de sesión':'registro');
+      toast(blocked?lockMsg():'Correo o contraseña incorrectos');return;
+    }
+    lockInfo={fails:0,until:0};save('cb_lock',lockInfo);
+    await ensureFixedAdmin();
+    cur=accounts.findIndex(a=>a.email===ADMIN_EMAIL);curRole='admin';
+    save('cb_cur3',cur);save('cb_role',curRole);
+    closeModal('m-auth');renderAll();goTab('inicio');toast(`Hola, ${me().name} (Administrador)`);
+    if(unread())setTimeout(openAlerts,400);
+    return;
+  }
+  if(pass.length<6){toast('La contraseña debe tener al menos 6 caracteres');return}
   if(authMode==='login'){
-    // Solo cuentas de Cliente ingresan por aquí: cualquier otra coincidencia se trata igual
-    // que un dato incorrecto, para no revelar que existen otros tipos de cuenta.
-    const i=accounts.findIndex(a=>a.email===email&&a.role==='cliente');
+    const i=accounts.findIndex(a=>a.email===email&&(a.role==='cliente'||a.role==='empleado'));
     if(i<0||accounts[i].pass!==hash){toast('Correo o contraseña incorrectos');return}
-    cur=i;
+    cur=i;curRole=accounts[i].role;
   }else{
     const name=$('#a-name').value.trim();
     if(!name){toast('Escribe tu nombre');return}
     if(accounts.some(a=>a.email===email)){toast('Ese correo ya tiene cuenta. Usa “Ingresar”');return}
-    accounts.push({name,email,pass:hash,role:'cliente',enabled:true,photo:pendingPhoto});cur=accounts.length-1;save('cb_acc3',accounts);
+    accounts.push({name,email,pass:hash,role:'cliente',enabled:true,photo:pendingPhoto});cur=accounts.length-1;save('cb_acc3',accounts);curRole='cliente';
   }
-  curRole='cliente';save('cb_cur3',cur);save('cb_role',curRole);
+  save('cb_cur3',cur);save('cb_role',curRole);
   closeModal('m-auth');renderAll();goTab('inicio');toast(`Hola, ${me().name}`);
 }
 function logout(){cur=-1;curRole=null;save('cb_cur3',cur);save('cb_role',curRole);renderAll();goTab('inicio');toast('Sesión cerrada')}
 function needLogin(){openModal('m-need')}
-
-/* ===== ACCESO INTERNO (Empleado / Administrador) =====
-   No hay ningún botón ni enlace visible para esto: se abre tocando 5 veces seguidas (en menos
-   de 2 segundos) el logo/nombre de la marca en el encabezado. Un cliente que nunca sepa del
-   gesto no tiene forma de encontrar ni de adivinar que esta puerta existe. */
-let _clicks=[];
-function secretClick(){
-  const now=Date.now();_clicks=_clicks.filter(t=>now-t<2200);_clicks.push(now);
-  if(_clicks.length>=5){_clicks=[];openStaff('login')}
-}
-function openStaff(mode){
-  ['st-name','st-mail','st-pass','st-code'].forEach(i=>$('#'+i).value='');
-  staffTab(mode);openModal('m-staff');
-}
-function staffTab(t){
-  staffMode=t;
-  $('#st-t-login').classList.toggle('on',t==='login');$('#st-t-new').classList.toggle('on',t==='new');
-  $('#staff-new-only').style.display=t==='new'?'block':'none';
-  $('#staff-code-only').style.display=t==='new'?'block':'none';
-  $('#staff-title').textContent=t==='login'?'Acceso de personal':'Crear acceso de administrador';
-  $('#staff-sub').textContent=t==='login'?'Exclusivo para empleados y administradores autorizados.':'Úsalo solo si todavía no existe ninguna cuenta de administrador.';
-  $('#staff-go').textContent=t==='login'?'Ingresar':'Crear administrador';
-}
-async function doStaff(){
-  const email=$('#st-mail').value.trim().toLowerCase(),pass=$('#st-pass').value;
-  if(!/\S+@\S+\.\S+/.test(email)||pass.length<6){toast('Revisa el correo y la contraseña');return}
-  const hash=await sha(email+'|'+pass);
-  if(staffMode==='login'){
-    const i=accounts.findIndex(a=>a.email===email&&(a.role==='empleado'||a.role==='admin'));
-    if(i<0||accounts[i].pass!==hash||!enabled(accounts[i])){toast('Acceso no autorizado');return}
-    cur=i;curRole=accounts[i].role;
-  }else{
-    const name=$('#st-name').value.trim(),code=$('#st-code').value;
-    if(!name){toast('Escribe tu nombre');return}
-    if(accounts.some(a=>a.email===email)){toast('Ese correo ya tiene una cuenta');return}
-    if(!(await checkCode('admin',code))){toast('Código incorrecto');return}
-    accounts.push({name,email,pass:hash,role:'admin',enabled:true,photo:''});cur=accounts.length-1;curRole='admin';
-  }
-  save('cb_acc3',accounts);save('cb_cur3',cur);save('cb_role',curRole);
-  closeModal('m-staff');renderAll();goTab('inicio');toast(`Hola, ${me().name} (${LABEL[role()]})`);
-}
 
 /* ===== GESTIÓN DE USUARIOS (solo administrador) =====
    Muestra a TODOS los usuarios de la página (clientes, vendedores y administradores).
@@ -657,7 +645,8 @@ function renderPanel(){
     <div class="kpi"><small>Clientes</small><b>${clientes}</b></div>
     <div class="kpi"><small>Vendedores</small><b>${vendedores}</b></div>
     <div class="kpi"><small>Administradores</small><b>${admins}</b></div>
-    <div class="kpi warn"><small>Cuentas inhabilitadas</small><b>${inhabilitados}</b></div>`;
+    <div class="kpi warn"><small>Cuentas inhabilitadas</small><b>${inhabilitados}</b></div>
+    <div class="kpi warn" style="cursor:pointer" onclick="openAlerts()"><small>Alertas de seguridad sin leer</small><b>${unread()}</b></div>`;
   const visibles=CAT.filter(isActive).length,ocultos=CAT.length-visibles;
   $('#pg-store').innerHTML=`
     <div class="kpi"><small>Productos en el catálogo</small><b>${CAT.length}</b></div>
